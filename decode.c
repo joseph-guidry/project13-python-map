@@ -70,7 +70,7 @@ struct node * decode (int argc, char **argv, int node_count)
 					fp = printCmdPayload(fp);
 					break;
 				case 3:
-					printf("getting gps data\n");
+					//printf("getting gps data\n");
 					fp = fillGpsPayload(fp, zerg_info);
 					break;
 				default:
@@ -92,7 +92,7 @@ struct node * decode (int argc, char **argv, int node_count)
 			if(   ! (((struct zerg*)root->key)->srcID)  )
 			//if root = null -> new node then key == null
 			{
-				printf("here!\n");
+				//printf("here!\n");
 				((struct zerg*)root->key)->srcID = zerg_info->srcID;
 				((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
 				((struct zerg*)root->key)->position.longitude.value = zerg_info->position.longitude.value;
@@ -101,7 +101,7 @@ struct node * decode (int argc, char **argv, int node_count)
 			}
 			else // Key != NULL 
 			{
-				printf("or here!\n");
+				//printf("or here!\n");
 				/* modifiy the data in the root->key data fields */
 			}
 			
