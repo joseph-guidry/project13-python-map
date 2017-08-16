@@ -129,6 +129,7 @@ typedef struct position
 
 struct zerg {
 	uint16_t srcID;
+	int number;
 	char * zerg_name;				
 	zerg_coordinates position;
 	zerg_health health;
@@ -146,5 +147,5 @@ double convertBin64toDecimal (unsigned long speed);
 uint64_t swapLong( uint64_t x);
 void degreesConvertDMS( double degrees);
 
-struct node * decode(int argc, char **argv, int nodes);
+struct node * decode(int argc, char **argv, int * nodes);
 

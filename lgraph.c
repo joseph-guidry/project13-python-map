@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "lgraph.h"
 
 
@@ -7,14 +8,16 @@
 #define _LGRAPH_H_
 /* credit to the Internet */
 /* Function to create adj. list node*/
-adjlist_node_ptr createNode(int v, double distance)
+adjlist_node_ptr createNode(int v, uint16_t src_id, double distance)
 {
+	printf("creating new node\n");
 	adjlist_node_ptr newNode = (adjlist_node_ptr)malloc(sizeof(adjlist_node));
 	if(!newNode)
 		//err_exit("Unable to allocate memory for new node");
 		fprintf(stderr, "Unable to allocate memory for new node");
 		
 	newNode->vertex = v;
+	newNode->src_ID = src_id;
 	newNode->distance = distance;
 	newNode->next = NULL;
 	
@@ -74,22 +77,26 @@ void destroyGraph(graph_ptr graph)
 }
 
 /* Add edge to graph */
-void addEdge(graph * graph, int src, int dest, double distance)
+void addEdge(graph * graph, int src, uint16_t src_id, int dest, uint16_t dest_id, double distance)
 {
+	printf("adding edge\n");
+	printf("src: %u | dest: %u \n", src, dest);
+	printf("dist: %f \n", distance);
 	/*add an edge from src to dst in the adj. list*/
-	adjlist_node_ptr newNode = createNode(dest, distance);
+	adjlist_node_ptr newNode = createNode(dest, dest_id, distance);
 	newNode->next = graph->adjListArr[src].head;
 	graph->adjListArr[src].head = newNode;
 	graph->adjListArr[src].num_members++;
 	
 	if(graph->type == UNDIRECTED)
 	{
-		/*add edge going the other direction as well*/
-		newNode = createNode(src, distance);
+		//add edge going the other direction as well
+		newNode = createNode(src, src_id, distance);
 		newNode->next = graph->adjListArr[dest].head;
 		graph->adjListArr[dest].head = newNode;
 		graph->adjListArr[dest].num_members++;
 	}
+	
 }
 
 /* Graph display function */

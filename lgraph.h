@@ -1,5 +1,6 @@
 #ifndef _GRAPH_H_
 #define _GRAPH_H_
+#include <inttypes.h>
 
 typedef enum {UNDIRECTED = 0, DIRECTED} graph_type; //UNDIRECTED == 0 & DIRECTED == 1
 
@@ -7,7 +8,8 @@ typedef enum {UNDIRECTED = 0, DIRECTED} graph_type; //UNDIRECTED == 0 & DIRECTED
 /* Adj list node */
 typedef struct adjlist_node
 {
-	int vertex;		
+	int vertex;
+	uint16_t src_ID;		
 	double distance;					//INdex to adj list array.
 	struct adjlist_node *next;			//Ptr of the next node
 }adjlist_node, *adjlist_node_ptr;
@@ -35,10 +37,10 @@ __inline void err_exit(char * msg)
 	exit(1);
 }
 
-adjlist_node_ptr createNode(int v, double distance);
+adjlist_node_ptr createNode(int v, uint16_t src, double distance);
 graph_ptr createGraph(int n, graph_type type);
 void destroyGraph(graph_ptr graph);
-void addEdge(graph * graph, int src, int dest, double distance);
+void addEdge(graph * graph, int src, uint16_t src_id, int dest, uint16_t dest_id, double distance);
 void displayGraph(graph_ptr graph);
 
 #endif

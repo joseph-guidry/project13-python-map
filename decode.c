@@ -22,7 +22,7 @@ void display(const void * data)
 }
 
 
-struct node * decode (int argc, char **argv, int node_count)
+struct node * decode (int argc, char **argv, int * node_count)
 {
 	FILE *fp;
 	struct zergPacket pcapfile;
@@ -87,16 +87,18 @@ struct node * decode (int argc, char **argv, int node_count)
 			printf("zerg alt: %f \n\n", zerg_info->position.altitude.value);	
 			*/
 			root = insert(root, zerg_info->srcID, sizeof(struct zerg), get_root_srcID);
-			node_count++;
 			//printf("key = null ? %c \n", (((struct zerg*)root->key)->srcID) == 0 ? 'T': 'F');
 			if(   ! (((struct zerg*)root->key)->srcID)  )
 			//if root = null -> new node then key == null
 			{
-				//printf("here!\n");
+				
+				//printf("here!  %d\n", *node_count);
+				((struct zerg*)root->key)->number = (*node_count);
 				((struct zerg*)root->key)->srcID = zerg_info->srcID;
 				((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
 				((struct zerg*)root->key)->position.longitude.value = zerg_info->position.longitude.value;
 				((struct zerg*)root->key)->position.altitude.value = zerg_info->position.altitude.value;
+				(*node_count)++;
 				/* ADD zerg_struct data to key */
 			}
 			else // Key != NULL 
