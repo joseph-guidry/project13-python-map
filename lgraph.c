@@ -109,7 +109,7 @@ void displayGraph(graph_ptr graph)
 		printf("\n%d: ", i);
 		while ( adjListPtr)
 		{
-			printf("%d->", adjListPtr->vertex);
+			printf("%d:%u->", adjListPtr->vertex, adjListPtr->src_ID);
 			adjListPtr = adjListPtr->next;
 		}
 		printf("NULL\n");

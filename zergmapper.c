@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
 #include "decode.h"
 #include "splay.h"
@@ -14,6 +15,7 @@ void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps);
 void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root);
 void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root);
 double get_distance(double src_lat, double src_long, double dest_lat, double dest_long);
+void find_reachable(graph_ptr graph, const int start, bool reach[]);
 
 int main(int argc, char **argv)
 {
@@ -55,13 +57,52 @@ int main(int argc, char **argv)
 	
 	printf("\nDIRECTED GRAPH");
 	displayGraph(dir_graph);
-	destroyGraph(dir_graph);
 	
-
 	
+	/* GETTING THE REACHABILITY of ALL NODES */
+	int i;
+	bool * reach = NULL;
+	//Create and initialize the bool reachability array
+	reach = malloc(sizeof(bool) * pcap_nodes->count);
+	for (i = 0; i < pcap_nodes->count; i++)
+	{
+		reach[i] = false;
+	}
+	
+	printf("getting reachability of all nodes from a single point\n");
+	find_reachable(dir_graph, 0, reach);
+	
+	for (i = 0; i < pcap_nodes->count; i++)
+	{
+		printf("reach[%d]=%d \n", i, reach[i]);
+	} 
+	//destroyGraph(dir_graph);
 	return 0;
 }
 
+
+void find_reachable(graph_ptr graph, const int current, bool reach[])
+{
+	reach[current] = true;
+	printf("current = %d \n", current);
+	//printf("
+	adjlist_node_ptr start = graph->adjListArr[current].head;
+	printf("here  %d \n", start->vertex);
+	printf("here  %u \n", start->src_ID);
+	printf("here  %f \n", start->distance);
+	
+	for (;start;start = start->next) 
+	{
+		printf("start->vertex = %d \n", start->vertex);
+		
+		if( !reach[start->vertex] ) 
+		{
+			find_reachable(graph,start->vertex,reach);
+		}
+		
+	}
+	
+}
 
 double get_distance(double src_lat, double src_long, double dest_lat, double dest_long)
 {
@@ -69,7 +110,6 @@ double get_distance(double src_lat, double src_long, double dest_lat, double des
 	printf("zerg_src->lat %f \n", src_lat );
 	printf("zerg_dest->lat %f \n", dest_lat );
 	return haversine_dist(src_lat, src_long, dest_lat, dest_long);
-	
 }
 
 
@@ -78,10 +118,8 @@ void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps)
 	if ( zerg != NULL)
 	{
 		//display_zerg(zerg->key);
-		printf("zerg_id = %u \n", ((struct zerg*)zerg->key)->srcID );
-		
+		//printf("zerg_id = %u \n", ((struct zerg*)zerg->key)->srcID );
 		get_all_edges(graph, zerg, pcaps->head);
-		
 		initialize_graph(graph, zerg->left, pcaps);
 		initialize_graph(graph, zerg->right, pcaps);
 	}
@@ -93,11 +131,9 @@ void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root)
 	printf("here in getting all edges \n");
 	if ( root != NULL)
 	{
-	adding_nodes(graph, zerg, root);
-	
-	get_all_edges(graph, zerg, root->left);
-	get_all_edges(graph, zerg, root->right);
-	
+		adding_nodes(graph, zerg, root);
+		get_all_edges(graph, zerg, root->left);
+		get_all_edges(graph, zerg, root->right);
 	}
 	return;
 }
@@ -125,12 +161,13 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 	double distance = 0.00;
 	if ( root != NULL)
 	{
+		//get_distance returns value in km -> multiply by 1000 to convert to meters.
 		distance = ( get_distance( zerg_src_lat, zerg_src_long, zerg_dest_lat, zerg_dest_long) * 1000);
+		//If distance meets minimum distance ( 1.25 yds * 0.9144) converts to meters.
 		if ( distance  > ( 1.25  * 0.9144)) 
-		//If distance meets minimum distance;
 		{
 			printf("distance = %f \n", distance);
-			
+			//If distance does not exceed max distance of 15 meters.
 			if (distance > 15)
 			{
 				printf("over 15 mdistance = %f \n", distance);
@@ -141,9 +178,7 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 			addEdge(graph, src_vertex, ((struct zerg*)zerg->key)->srcID, dest_vertex, ((struct zerg*)root->key)->srcID, distance);
 			printf("after addEdge\n");
 		}
-		
 	}
-	
 	return;
 }
 
