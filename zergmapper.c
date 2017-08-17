@@ -1,21 +1,25 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+//#include <limits.h>
 
 #include "decode.h"
 #include "splay.h"
 #include "lgraph.h"
 #include "haversine.h"
+#include "min_heap.h"
 
 #define DIRECTED 1
 #define UNDIRECTED 0
-
+#define MAX 99999.99
 void display_zerg(const void * data);
 void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps);
 void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root);
 void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root);
 double get_distance(double src_lat, double src_long, double dest_lat, double dest_long);
 void find_reachable(graph_ptr graph, const int start, bool reach[]);
+
+void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes );
 
 int main(int argc, char **argv)
 {
@@ -76,9 +80,67 @@ int main(int argc, char **argv)
 	{
 		printf("reach[%d]=%d \n", i, reach[i]);
 	} 
+	
+	printf("running dijkstras !!!! \n");
+	shortest_path(dir_graph, 0, pcap_nodes->count);
+	
 	//destroyGraph(dir_graph);
 	return 0;
 }
+
+// THe Dijkstra algorithm
+void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
+{
+	int v = graph_nodes; // number of vertex in the graph? pass in from BST?
+	double distance[v];
+	
+	//create a min heap
+	struct MinHeap * minHeap = createMinHeap(v);
+	
+	//initialize min heap with all vertices dist value of all vertex
+	for (int x = 0; x < v ; ++x )
+	{
+		distance[x] = MAX;
+		printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
+		minHeap->array[x] = newMinHeapNode(x, 16, distance[v]);
+		minHeap->pos[x] = x;
+	}	
+	
+	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, 16, distance[start_vertex]);
+	minHeap->pos[start_vertex] = start_vertex;
+	distance[start_vertex] = 0;
+	decreaseKey(minHeap, start_vertex, distance[start_vertex]);
+	
+	minHeap->size = v;
+	
+	while( !isEmpty(minHeap))
+	{
+		//Extract the vertex with minimum distance value
+		struct MinHeapNode * minHeapNode = extractMin(minHeap);
+		int u = minHeapNode->v;
+		
+		//Traverse through all adjacent vertices of u (the extracted
+		// vertex) and update their distance values.
+		
+		struct adjlist_node * pCrawl = graph->adjListArr[u].head;
+		while( pCrawl != NULL)
+		{
+			int v = pCrawl->vertex;
+			
+			//If shortest distance to is not finalized yet, and distance to v 
+			// through u is less than its previously calculated distance
+			if ( isInMinHeap(minHeap, v) && distance[u] < MAX && pCrawl->distance + distance[u] < distance[v])
+			{
+				distance[v] = distance[u] + pCrawl->distance;
+				//UPDATE DISTANCE VALUE in min heap also
+				decreaseKey(minHeap, v, distance[v]);
+			}
+			pCrawl = pCrawl->next;
+		}
+	}
+	printArr(distance, v);
+}
+
 
 
 void find_reachable(graph_ptr graph, const int current, bool reach[])
@@ -99,9 +161,7 @@ void find_reachable(graph_ptr graph, const int current, bool reach[])
 		{
 			find_reachable(graph,start->vertex,reach);
 		}
-		
 	}
-	
 }
 
 double get_distance(double src_lat, double src_long, double dest_lat, double dest_long)
