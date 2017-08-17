@@ -25,6 +25,8 @@ int main(int argc, char **argv)
 {
 	struct tree * pcap_nodes = create_tree();
 	pcap_nodes->head = decode(argc, argv, &pcap_nodes->count);
+	int nodes = pcap_nodes->count;
+	
 	printf("number of nodes  = %d \n", pcap_nodes->count);
 	if ( pcap_nodes->head != NULL )
 	{
@@ -39,16 +41,17 @@ int main(int argc, char **argv)
 	//printf("\n\nprinting nodes\n\n");
 	//preOrder(pcap_nodes->head, display_zerg);
 	
-	graph_ptr dir_graph = createGraph(pcap_nodes->count, DIRECTED);
+	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
 	
 	printf("entering initialize \n\n");
 	initialize_graph(dir_graph, pcap_nodes->head, pcap_nodes);
 	printf("exiting initialize \n");
 	
+	
 	printf("\nUNDIRECTED GRAPH");
 	displayGraph(dir_graph);
 	printf("\n");
-	
+	remove_tree(pcap_nodes);
 	/* read files  */
 		/*check for options */
 	
@@ -67,8 +70,8 @@ int main(int argc, char **argv)
 	int i;
 	bool * reach = NULL;
 	//Create and initialize the bool reachability array
-	reach = malloc(sizeof(bool) * pcap_nodes->count);
-	for (i = 0; i < pcap_nodes->count; i++)
+	reach = malloc(sizeof(bool) * nodes);
+	for (i = 0; i < nodes; i++)
 	{
 		reach[i] = false;
 	}
@@ -76,15 +79,17 @@ int main(int argc, char **argv)
 	printf("getting reachability of all nodes from a single point\n");
 	find_reachable(dir_graph, 0, reach);
 	
-	for (i = 0; i < pcap_nodes->count; i++)
+	for (i = 0; i < nodes; i++)
 	{
 		printf("reach[%d]=%d \n", i, reach[i]);
 	} 
 	
 	printf("running dijkstras !!!! \n");
-	shortest_path(dir_graph, 0, pcap_nodes->count);
+	for ( int x = 0; x < pcap_nodes->count; x++)
+		shortest_path(dir_graph, x, nodes);
 	
-	//destroyGraph(dir_graph);
+	free(reach);
+	destroyGraph(dir_graph);	
 	return 0;
 }
 
@@ -102,11 +107,11 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	{
 		distance[x] = MAX;
 		printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
-		minHeap->array[x] = newMinHeapNode(x, 16, distance[v]);
+		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, distance[v]);
 		minHeap->pos[x] = x;
 	}	
 	
-	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, 16, distance[start_vertex]);
+	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, graph->adjListArr[start_vertex].head->src_ID, distance[start_vertex]);
 	minHeap->pos[start_vertex] = start_vertex;
 	distance[start_vertex] = 0;
 	decreaseKey(minHeap, start_vertex, distance[start_vertex]);
@@ -138,7 +143,11 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 			pCrawl = pCrawl->next;
 		}
 	}
-	printArr(distance, v);
+	
+	destroyHeap(minHeap);
+	printf("\n");
+	printArr(distance, v, start_vertex);
+	printf("\n");
 }
 
 

@@ -17,6 +17,16 @@ struct tree * create_tree(void)
 	return tree;
 }
 
+void remove_tree(struct tree * old_tree)
+{
+	if ( old_tree->head != NULL )
+	{
+		delNode(old_tree->head);
+		free(old_tree);
+	}
+	
+}
+
 //Makes new nodes with given key and NULL pointers.
 struct node * newNode ( unsigned int size)
 {

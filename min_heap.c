@@ -4,11 +4,6 @@
 #include <inttypes.h>
 
 #include "min_heap.h"
-double compare(const void * data1, const void * data2)
-{
-	
-	return 0.00;
-}
 
 //A utility funciton to create a new Min Heap Node
 struct MinHeapNode * newMinHeapNode(int v, uint16_t src_ID, double distance)
@@ -20,6 +15,11 @@ struct MinHeapNode * newMinHeapNode(int v, uint16_t src_ID, double distance)
 	return minHeapNode;
 }
 
+void destroyHeapNode(struct MinHeapNode * minHeapNode)
+{
+	free(minHeapNode);
+}
+
 // Utility to make a min heap -> where does capacity come from.
 struct MinHeap * createMinHeap(int capacity)
 {
@@ -29,6 +29,16 @@ struct MinHeap * createMinHeap(int capacity)
 	minHeap->capacity = capacity;
 	minHeap->array = (struct MinHeapNode**)malloc(capacity * sizeof(struct MinHeapNode * ));
 	return minHeap;
+}
+
+void destroyHeap(struct MinHeap * minHeap)
+{
+	for (int x = 0; x < minHeap->size; x++)
+	{
+		destroyHeapNode(minHeap->array[x]);
+	}
+	free(minHeap->pos);
+	free(minHeap);
 }
 
 //Swap nodes in heap
@@ -137,11 +147,11 @@ bool isInMinHeap(struct MinHeap * minHeap, int v)
 }
 
 //printing the path solution
-void printArr(double distance[], int n)
+void printArr(double distance[], int n, int start_vertex)
 {
 	printf("Vertex	Distance from source \n");
 	for (int i = 0; i < n ; i++)
 	{
-		printf("%d \t %f\n", i, distance[i]);
+		printf("From %d to %d \t %f\n", start_vertex, i, distance[i]);
 	}
 }

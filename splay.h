@@ -16,3 +16,6 @@ struct node * search(struct node * root, uint16_t key, uint16_t (*get_srcID)(voi
 struct node * insert(struct node * root, uint16_t key,  unsigned int size, uint16_t (*get_srcID)(void * data));
 void preOrder(struct node * root, void (*display)(const void * data));
 struct tree * create_tree(void);
+
+void delNode(struct node * root);
+void remove_tree(struct tree * old_tree);

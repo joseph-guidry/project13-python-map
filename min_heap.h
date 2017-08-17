@@ -23,4 +23,7 @@ int isEmpty(struct MinHeap * minHeap);
 struct MinHeapNode * extractMin(struct MinHeap * minHeap);
 void decreaseKey(struct MinHeap * minHeap, int v, double distance);
 bool isInMinHeap(struct MinHeap * minHeap, int v);
-void printArr(double distance[], int n);
+void printArr(double distance[], int n, int start_vertex);
+
+void destroyNode(struct MinHeapNode * minHeapNode);
+void destroyHeap(struct MinHeap * minHeap);
