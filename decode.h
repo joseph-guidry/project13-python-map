@@ -82,7 +82,7 @@ struct zergPacket {
 	struct filepcap fileHeader;				//pcap File Header structure
 	struct headerpcap packetHeader;  		//pcap Packet Header structure
 	struct etherFrame pcapFrame;			//pcap Ethernet Frame
-	ipVersion pcapIp;						//pcap IPv4 header
+	ipVersion pcapIp;						//pcap IP header
 	struct udpHeader  pcapUdp;				//pcap UDP header
 	struct zergHeader pcapZerg;				//custom Zerg Packet Header
 };

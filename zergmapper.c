@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-//#include <limits.h>
+#include <getopt.h>
 
 #include "decode.h"
 #include "splay.h"
@@ -23,6 +23,23 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes );
 
 int main(int argc, char **argv)
 {
+	int option, min_health;
+	option = getopt(argc, argv, "h:");
+	printf("option : %c \n", option == -1? 'T':option);
+	printf("option arg: %d \n", option == -1 ? 'T':atoi(optarg));
+	
+	switch (option)
+	{
+		case 'h': 
+			min_health = atoi(optarg);
+			break;
+		default:
+			min_health = 10;
+			break;
+	}
+	
+	printf("min_health: %d \n", min_health);
+	
 	struct tree * pcap_nodes = create_tree();
 	pcap_nodes->head = decode(argc, argv, &pcap_nodes->count);
 	int nodes = pcap_nodes->count;
@@ -40,7 +57,7 @@ int main(int argc, char **argv)
 	//printf("pcap_nodes->head == NULL ? %c \n", pcap_nodes->head == NULL ? 'T':'F');
 	//printf("\n\nprinting nodes\n\n");
 	//preOrder(pcap_nodes->head, display_zerg);
-	
+	exit(1);
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
 	
 	//printf("entering initialize \n\n");
@@ -94,7 +111,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 {
 	int v = graph_nodes; // number of vertex in the graph? pass in from BST?
 	double distance[v];
-	int end_vertex = 1;
+	//int end_vertex = 1;
 	
 	//create a min heap
 	struct MinHeap * minHeap = createMinHeap(v);
@@ -140,6 +157,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 				//printf("v = %d \n", v);
 				//UPDATE DISTANCE VALUE in min heap also
 				decreaseKey(minHeap, v, distance[v]);
+				/*
 				if ( v == end_vertex )
 				{
 					//printf("here\n");
@@ -147,6 +165,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 						;
 					break;
 				}
+				*/
 			}
 			pCrawl = pCrawl->next;
 		}
