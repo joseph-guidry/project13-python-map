@@ -13,6 +13,7 @@
 #define UNDIRECTED 0
 #define MAX 99999.99
 void display_zerg(const void * data);
+void get_health(struct node * root, int health);
 void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps);
 void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root);
 void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root);
@@ -57,7 +58,8 @@ int main(int argc, char **argv)
 	//printf("pcap_nodes->head == NULL ? %c \n", pcap_nodes->head == NULL ? 'T':'F');
 	//printf("\n\nprinting nodes\n\n");
 	preOrder(pcap_nodes->head, display_zerg);
-	exit(1);
+	//get_health(pcap_nodes->head, min_health);  -> HOw to handle zergs with 0 hit points.
+
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
 	
 	//printf("entering initialize \n\n");
@@ -106,29 +108,44 @@ int main(int argc, char **argv)
 	return 0;
 }
 
+void get_health(struct node * root, int min_health)
+{
+	//printf("here in getting all edges \n");
+	if ( root != NULL)
+	{
+		double health_pct =  ((struct zerg*)root->key)->health.hit_points / ((struct zerg*)root->key)->health.max_points;
+		if ( ( health_pct * 100) <= min_health )
+			printf("health %d \n", ((struct zerg*)root->key)->health.hit_points );
+		get_health(root->left, min_health);
+		get_health(root->right, min_health);
+	}
+	return;
+}
+
 // THe Dijkstra algorithm
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 {
 	int v = graph_nodes; // number of vertex in the graph? pass in from BST?
-	double distance[v];
+
+	double ** distance = malloc(sizeof(double) * v);
 	//int end_vertex = 1;
 	
 	//create a min heap
 	struct MinHeap * minHeap = createMinHeap(v);
-	
+	printf("here\n");
 	//initialize min heap with all vertices dist value of all vertex
 	for (int x = 0; x < v ; ++x )
 	{
-		distance[x] = MAX;
-		//printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
-		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, distance[v]);
+		*(distance[x]) = MAX;
+		printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
+		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, *(distance[v]));
 		minHeap->pos[x] = x;
 	}	
-	
-	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, graph->adjListArr[start_vertex].head->src_ID, distance[start_vertex]);
+	printf("end\n");
+	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, graph->adjListArr[start_vertex].head->src_ID, *(distance[start_vertex]));
 	minHeap->pos[start_vertex] = start_vertex;
-	distance[start_vertex] = 0;
-	decreaseKey(minHeap, start_vertex, distance[start_vertex]);
+	*(distance[start_vertex]) = 0;
+	decreaseKey(minHeap, start_vertex, *(distance[start_vertex]));
 	
 	minHeap->size = v;
 	//printf("start = %d \n", start_vertex);
@@ -151,12 +168,12 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 			// through u is less than its previously calculated distance
 			//printf("distance u : %f \n", distance[u]);
 			//printf("less than MAX %f : %c \n", MAX,  distance[u] < MAX ? 'T':'F');
-			if ( isInMinHeap(minHeap, v) && (distance[u] < MAX) && (pCrawl->distance + distance[u] < distance[v]) )
+			if ( isInMinHeap(minHeap, v) && (*(distance[u]) < MAX) && (pCrawl->distance + *(distance[u]) < *(distance[v])) )
 			{
-				distance[v] = distance[u] + pCrawl->distance;
+				*(distance[v]) = *(distance[u]) + pCrawl->distance;
 				//printf("v = %d \n", v);
 				//UPDATE DISTANCE VALUE in min heap also
-				decreaseKey(minHeap, v, distance[v]);
+				decreaseKey(minHeap, v, *(distance[v]));
 				/*
 				if ( v == end_vertex )
 				{
@@ -173,7 +190,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	
 	destroyHeap(minHeap);
 	printf("\n");
-	printArr(distance, v, start_vertex);
+	printArr(*distance, v, start_vertex);
 	printf("\n");
 }
 
