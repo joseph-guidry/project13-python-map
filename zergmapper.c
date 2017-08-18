@@ -126,8 +126,9 @@ void get_health(struct node * root, int min_health)
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 {
 	int v = graph_nodes; // number of vertex in the graph? pass in from BST?
-
-	double ** distance = malloc(sizeof(double) * v);
+	
+	//Warning cleared -> Thanks to Dr. Oberts!!!
+	double * distance = malloc(sizeof(double) * v);
 	//int end_vertex = 1;
 	
 	//create a min heap
@@ -136,16 +137,16 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	//initialize min heap with all vertices dist value of all vertex
 	for (int x = 0; x < v ; ++x )
 	{
-		*(distance[x]) = MAX;
+		distance[x] = MAX;
 		printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
-		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, *(distance[v]));
+		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, distance[v]);
 		minHeap->pos[x] = x;
 	}	
 	printf("end\n");
-	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, graph->adjListArr[start_vertex].head->src_ID, *(distance[start_vertex]));
+	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, graph->adjListArr[start_vertex].head->src_ID, distance[start_vertex]);
 	minHeap->pos[start_vertex] = start_vertex;
-	*(distance[start_vertex]) = 0;
-	decreaseKey(minHeap, start_vertex, *(distance[start_vertex]));
+	distance[start_vertex] = 0;
+	decreaseKey(minHeap, start_vertex, distance[start_vertex]);
 	
 	minHeap->size = v;
 	//printf("start = %d \n", start_vertex);
@@ -168,12 +169,12 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 			// through u is less than its previously calculated distance
 			//printf("distance u : %f \n", distance[u]);
 			//printf("less than MAX %f : %c \n", MAX,  distance[u] < MAX ? 'T':'F');
-			if ( isInMinHeap(minHeap, v) && (*(distance[u]) < MAX) && (pCrawl->distance + *(distance[u]) < *(distance[v])) )
+			if ( isInMinHeap(minHeap, v) && (distance[u] < MAX) && (pCrawl->distance + distance[u] < distance[v]) )
 			{
-				*(distance[v]) = *(distance[u]) + pCrawl->distance;
+				distance[v] = distance[u] + pCrawl->distance;
 				//printf("v = %d \n", v);
 				//UPDATE DISTANCE VALUE in min heap also
-				decreaseKey(minHeap, v, *(distance[v]));
+				decreaseKey(minHeap, v, distance[v]);
 				/*
 				if ( v == end_vertex )
 				{
@@ -190,7 +191,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	
 	destroyHeap(minHeap);
 	printf("\n");
-	printArr(*distance, v, start_vertex);
+	printArr(distance, v, start_vertex);
 	printf("\n");
 }
 
