@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 	
 	//printf("pcap_nodes->head == NULL ? %c \n", pcap_nodes->head == NULL ? 'T':'F');
 	//printf("\n\nprinting nodes\n\n");
-	//preOrder(pcap_nodes->head, display_zerg);
+	preOrder(pcap_nodes->head, display_zerg);
 	exit(1);
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
 	

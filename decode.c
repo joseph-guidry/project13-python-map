@@ -67,6 +67,7 @@ struct node * decode (int argc, char **argv, int * node_count)
 						fp = printMsgPayload(&pcapfile, fp);
 						break;
 					case 1:
+						//printf("getting status data\n");
 						fp = fillStatusPayload(&pcapfile, fp, zerg_info);
 						break;
 					case 2:
@@ -89,24 +90,59 @@ struct node * decode (int argc, char **argv, int * node_count)
 				printf("zerg lat: %f \n", zerg_info->position.latitude.value);	
 				printf("zerg alt: %f \n\n", zerg_info->position.altitude.value);	
 				*/
+				
+				/* 
+				printf("zerg_info = null: %c \n\n", zerg_info != NULL ? 'F':'T');	
+				printf("zerg : %u \n", zerg_info->srcID );
+				printf("zerg long: %d \n", zerg_info->health.hit_points;
+				printf("zerg long: %d \n", zerg_info->health.max_points;	
+				
+				*/
 				root = insert(root, zerg_info->srcID, sizeof(struct zerg), get_root_srcID);
 				//printf("key = null ? %c \n", (((struct zerg*)root->key)->srcID) == 0 ? 'T': 'F');
 				if(   ! (((struct zerg*)root->key)->srcID)  )
 				//if root = null -> new node then key == null
 				{
-				
-					//printf("here!  %d\n", *node_count);
-					((struct zerg*)root->key)->number = (*node_count);
-					((struct zerg*)root->key)->srcID = zerg_info->srcID;
-					((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
-					((struct zerg*)root->key)->position.longitude.value = zerg_info->position.longitude.value;
-					((struct zerg*)root->key)->position.altitude.value = zerg_info->position.altitude.value;
-					(*node_count)++;
-					/* ADD zerg_struct data to key */
+					if( msgType == 1)
+					{
+						printf("updating status on zerg\n");
+					}
+					//	update gps data
+					else if ( msgType == 3)
+					{
+						printf("Adding new zerg with gps data\n");
+						//printf("here!  %d\n", *node_count);
+						((struct zerg*)root->key)->number = (*node_count);
+						((struct zerg*)root->key)->srcID = zerg_info->srcID;
+						((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
+						((struct zerg*)root->key)->position.longitude.value = zerg_info->position.longitude.value;
+						((struct zerg*)root->key)->position.altitude.value = zerg_info->position.altitude.value;
+						(*node_count)++;
+						/* ADD zerg_struct data to key */
+					}
 				}
-				else // Key != NULL 
+				else 
 				{
-					//printf("or here!\n");
+					if( msgType == 1)
+					{
+						printf("updating status on zerg\n");
+						//((struct zerg*)root->key)->health.hit_.value
+					}
+					else if ( msgType == 2)
+					{
+						printf("updating cmd payload stufff!\n");
+					}
+					//	update gps data
+					else if ( msgType == 3)
+					{
+						printf("updating gps data in zerg %u \n", ((struct zerg*)root->key)->srcID = zerg_info->srcID );
+						((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
+						((struct zerg*)root->key)->position.longitude.value = zerg_info->position.longitude.value;
+						((struct zerg*)root->key)->position.altitude.value = zerg_info->position.altitude.value;
+					}
+					
+					//((struct zerg*)root->key)->health.hit_.value
+					//	update status items. 
 					/* modifiy the data in the root->key data fields */
 				}
 			
