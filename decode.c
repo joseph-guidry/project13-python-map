@@ -120,7 +120,6 @@ struct node * decode (int argc, char **argv, int * node_count)
 				}
 			}
 			zerg_info = NULL;
-			//destroy_zerg(zerg_info);
 		}
 		fclose(fp);
 	}

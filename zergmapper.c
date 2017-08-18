@@ -27,7 +27,7 @@ int main(int argc, char **argv)
 	pcap_nodes->head = decode(argc, argv, &pcap_nodes->count);
 	int nodes = pcap_nodes->count;
 	
-	printf("number of nodes  = %d \n", pcap_nodes->count);
+	//printf("number of nodes  = %d \n", pcap_nodes->count);
 	if ( pcap_nodes->head != NULL )
 	{
 		printf("\nsuccesful call to decode\n");
@@ -37,20 +37,16 @@ int main(int argc, char **argv)
 		printf("fail to call decode\n");
 	}
 	
-	printf("pcap_nodes->head == NULL ? %c \n", pcap_nodes->head == NULL ? 'T':'F');
+	//printf("pcap_nodes->head == NULL ? %c \n", pcap_nodes->head == NULL ? 'T':'F');
 	//printf("\n\nprinting nodes\n\n");
 	//preOrder(pcap_nodes->head, display_zerg);
 	
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
 	
-	printf("entering initialize \n\n");
+	//printf("entering initialize \n\n");
 	initialize_graph(dir_graph, pcap_nodes->head, pcap_nodes);
-	printf("exiting initialize \n");
+	//printf("exiting initialize \n");
 	
-	
-	printf("\nUNDIRECTED GRAPH");
-	displayGraph(dir_graph);
-	printf("\n");
 	remove_tree(pcap_nodes);
 	/* read files  */
 		/*check for options */
@@ -85,8 +81,8 @@ int main(int argc, char **argv)
 	} 
 	
 	printf("running dijkstras !!!! \n");
-	for ( int x = 0; x < pcap_nodes->count; x++)
-		shortest_path(dir_graph, x, nodes);
+	//for ( int x = 0; x < pcap_nodes->count; x++)
+		shortest_path(dir_graph, 0, nodes);
 	
 	free(reach);
 	destroyGraph(dir_graph);	
@@ -98,6 +94,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 {
 	int v = graph_nodes; // number of vertex in the graph? pass in from BST?
 	double distance[v];
+	int end_vertex = 1;
 	
 	//create a min heap
 	struct MinHeap * minHeap = createMinHeap(v);
@@ -106,7 +103,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	for (int x = 0; x < v ; ++x )
 	{
 		distance[x] = MAX;
-		printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
+		//printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
 		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, distance[v]);
 		minHeap->pos[x] = x;
 	}	
@@ -117,7 +114,8 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	decreaseKey(minHeap, start_vertex, distance[start_vertex]);
 	
 	minHeap->size = v;
-	
+	//printf("start = %d \n", start_vertex);
+	printf("\n");
 	while( !isEmpty(minHeap))
 	{
 		//Extract the vertex with minimum distance value
@@ -126,7 +124,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 		
 		//Traverse through all adjacent vertices of u (the extracted
 		// vertex) and update their distance values.
-		
+		printf("vertex = %d \n", u);
 		struct adjlist_node * pCrawl = graph->adjListArr[u].head;
 		while( pCrawl != NULL)
 		{
@@ -134,11 +132,21 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 			
 			//If shortest distance to is not finalized yet, and distance to v 
 			// through u is less than its previously calculated distance
-			if ( isInMinHeap(minHeap, v) && distance[u] < MAX && pCrawl->distance + distance[u] < distance[v])
+			//printf("distance u : %f \n", distance[u]);
+			//printf("less than MAX %f : %c \n", MAX,  distance[u] < MAX ? 'T':'F');
+			if ( isInMinHeap(minHeap, v) && (distance[u] < MAX) && (pCrawl->distance + distance[u] < distance[v]) )
 			{
 				distance[v] = distance[u] + pCrawl->distance;
+				//printf("v = %d \n", v);
 				//UPDATE DISTANCE VALUE in min heap also
 				decreaseKey(minHeap, v, distance[v]);
+				if ( v == end_vertex )
+				{
+					//printf("here\n");
+					while( extractMin(minHeap) != NULL)
+						;
+					break;
+				}
 			}
 			pCrawl = pCrawl->next;
 		}
@@ -155,16 +163,16 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 void find_reachable(graph_ptr graph, const int current, bool reach[])
 {
 	reach[current] = true;
-	printf("current = %d \n", current);
+	//printf("current = %d \n", current);
 	//printf("
 	adjlist_node_ptr start = graph->adjListArr[current].head;
-	printf("here  %d \n", start->vertex);
-	printf("here  %u \n", start->src_ID);
-	printf("here  %f \n", start->distance);
+	//printf("here  %d \n", start->vertex);
+	//printf("here  %u \n", start->src_ID);
+	//printf("here  %f \n", start->distance);
 	
 	for (;start;start = start->next) 
 	{
-		printf("start->vertex = %d \n", start->vertex);
+		//printf("start->vertex = %d \n", start->vertex);
 		
 		if( !reach[start->vertex] ) 
 		{
@@ -176,8 +184,8 @@ void find_reachable(graph_ptr graph, const int current, bool reach[])
 double get_distance(double src_lat, double src_long, double dest_lat, double dest_long)
 {
 	printf("\n\nin get_distance\n");
-	printf("zerg_src->lat %f \n", src_lat );
-	printf("zerg_dest->lat %f \n", dest_lat );
+	//printf("zerg_src->lat %f \n", src_lat );
+	//printf("zerg_dest->lat %f \n", dest_lat );
 	return haversine_dist(src_lat, src_long, dest_lat, dest_long);
 }
 
@@ -197,7 +205,7 @@ void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps)
 
 void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root)
 {
-	printf("here in getting all edges \n");
+	//printf("here in getting all edges \n");
 	if ( root != NULL)
 	{
 		adding_nodes(graph, zerg, root);
@@ -211,17 +219,17 @@ void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root)
 void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 {
 	
-	printf("\n\nsrc\n");
-	printf("zerg_src->lat %f \n", ((struct zerg*)zerg->key)->position.latitude.value );
-	printf("zerg_src->long %f \n", ((struct zerg*)zerg->key)->position.longitude.value );
+	//printf("\n\nsrc\n");
+	//printf("zerg_src->lat %f \n", ((struct zerg*)zerg->key)->position.latitude.value );
+	//printf("zerg_src->long %f \n", ((struct zerg*)zerg->key)->position.longitude.value );
 	
 	double zerg_src_lat = ((struct zerg*)zerg->key)->position.latitude.value ;
 	double zerg_src_long = ((struct zerg*)zerg->key)->position.longitude.value;
 	int src_vertex = ((struct zerg*)zerg->key)->number;
 	
-	printf("\n\ndest\n");
-	printf("zerg_dest->lat %f \n", ((struct zerg*)root->key)->position.latitude.value );
-	printf("zerg_dest->long %f \n", ((struct zerg*)root->key)->position.longitude.value );
+	//printf("\n\ndest\n");
+	//printf("zerg_dest->lat %f \n", ((struct zerg*)root->key)->position.latitude.value );
+	//printf("zerg_dest->long %f \n", ((struct zerg*)root->key)->position.longitude.value );
 	
 	double zerg_dest_lat = ((struct zerg*)root->key)->position.latitude.value;
 	double zerg_dest_long = ((struct zerg*)root->key)->position.longitude.value;
@@ -245,7 +253,7 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 			}
 			printf("distance is withing range!!!! \n");
 			addEdge(graph, src_vertex, ((struct zerg*)zerg->key)->srcID, dest_vertex, ((struct zerg*)root->key)->srcID, distance);
-			printf("after addEdge\n");
+			//printf("after addEdge\n");
 		}
 	}
 	return;

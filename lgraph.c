@@ -10,7 +10,7 @@
 /* Function to create adj. list node*/
 adjlist_node_ptr createNode(int v, uint16_t src_id, double distance)
 {
-	printf("creating new node\n");
+	//printf("creating new node\n");
 	adjlist_node_ptr newNode = (adjlist_node_ptr)malloc(sizeof(adjlist_node));
 	if(!newNode)
 		//err_exit("Unable to allocate memory for new node");
@@ -80,8 +80,8 @@ void destroyGraph(graph_ptr graph)
 void addEdge(graph * graph, int src, uint16_t src_id, int dest, uint16_t dest_id, double distance)
 {
 	printf("adding edge\n");
-	printf("src: %u | dest: %u \n", src, dest);
-	printf("dist: %f \n", distance);
+	//printf("src: %u | dest: %u \n", src, dest);
+	//printf("dist: %f \n", distance);
 	/*add an edge from src to dst in the adj. list*/
 	adjlist_node_ptr newNode = createNode(dest, dest_id, distance);
 	newNode->next = graph->adjListArr[src].head;
