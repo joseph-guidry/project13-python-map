@@ -110,7 +110,7 @@ struct node * decode (int argc, char **argv, int * node_count)
 					//	update gps data
 					else if ( msgType == 3)
 					{
-						printf("Adding new zerg with gps data\n");
+						//printf("Adding new zerg with gps data\n");
 						//printf("here!  %d\n", *node_count);
 						((struct zerg*)root->key)->number = (*node_count);
 						((struct zerg*)root->key)->srcID = zerg_info->srcID;
@@ -135,7 +135,7 @@ struct node * decode (int argc, char **argv, int * node_count)
 					//	update gps data
 					else if ( msgType == 3)
 					{
-						printf("updating gps data in zerg %u \n", ((struct zerg*)root->key)->srcID = zerg_info->srcID );
+						//printf("updating gps data in zerg %u \n", ((struct zerg*)root->key)->srcID = zerg_info->srcID );
 						((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
 						((struct zerg*)root->key)->position.longitude.value = zerg_info->position.longitude.value;
 						((struct zerg*)root->key)->position.altitude.value = zerg_info->position.altitude.value;

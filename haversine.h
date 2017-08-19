@@ -1,1 +1,1 @@
-double haversine_dist(double th1, double ph1, double th2, double ph2);
+double haversine_dist(double lat1, double long1, double alt1, double lat2, double long2, double alt2);

@@ -12,22 +12,24 @@
 #define DIRECTED 1
 #define UNDIRECTED 0
 #define MAX 99999.99
+
 void display_zerg(const void * data);
 void get_health(struct node * root, int health);
 void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps);
 void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root);
 void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root);
-double get_distance(double src_lat, double src_long, double dest_lat, double dest_long);
+double get_distance(double src_lat, double src_long, double src_alt, double dest_lat, double dest_long, double dest_alt);
 void find_reachable(graph_ptr graph, const int start, bool reach[]);
 
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes );
+void shortest_path_v2(graph_ptr graph, int start_node, int graph_nodes);
 
 int main(int argc, char **argv)
 {
 	int option, min_health;
 	option = getopt(argc, argv, "h:");
-	printf("option : %c \n", option == -1? 'T':option);
-	printf("option arg: %d \n", option == -1 ? 'T':atoi(optarg));
+	//printf("option : %c \n", option == -1? 'T':option);
+	//printf("option arg: %d \n", option == -1 ? 'T':atoi(optarg));
 	
 	switch (option)
 	{
@@ -57,7 +59,7 @@ int main(int argc, char **argv)
 	
 	//printf("pcap_nodes->head == NULL ? %c \n", pcap_nodes->head == NULL ? 'T':'F');
 	//printf("\n\nprinting nodes\n\n");
-	preOrder(pcap_nodes->head, display_zerg);
+	//preOrder(pcap_nodes->head, display_zerg);
 	//get_health(pcap_nodes->head, min_health);  -> HOw to handle zergs with 0 hit points.
 
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
@@ -98,11 +100,17 @@ int main(int argc, char **argv)
 	{
 		printf("reach[%d]=%d \n", i, reach[i]);
 	} 
-	
+	//int * path = malloc(sizeof(int) * nodes);
 	printf("running dijkstras !!!! \n");
-	//for ( int x = 0; x < pcap_nodes->count; x++)
-		shortest_path(dir_graph, 0, nodes);
-	
+	shortest_path(dir_graph, 0, nodes);
+	printf("\n");
+	/*
+	for ( int x = 0; x < nodes; x++)
+	{
+		printf("starting at %d \n", x );
+		shortest_path_v2(dir_graph, x, nodes);
+	}
+	*/
 	free(reach);
 	destroyGraph(dir_graph);	
 	return 0;
@@ -123,13 +131,13 @@ void get_health(struct node * root, int min_health)
 }
 
 // THe Dijkstra algorithm
-void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
+void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes)
 {
 	int v = graph_nodes; // number of vertex in the graph? pass in from BST?
-	
 	//Warning cleared -> Thanks to Dr. Oberts!!!
 	double * distance = malloc(sizeof(double) * v);
-	//int end_vertex = 1;
+	int * pred = malloc(sizeof(int) * graph_nodes);
+	int i, j;
 	
 	//create a min heap
 	struct MinHeap * minHeap = createMinHeap(v);
@@ -138,6 +146,7 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	for (int x = 0; x < v ; ++x )
 	{
 		distance[x] = MAX;
+		pred[x] = start_vertex;
 		printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
 		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, distance[v]);
 		minHeap->pos[x] = x;
@@ -172,18 +181,11 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 			if ( isInMinHeap(minHeap, v) && (distance[u] < MAX) && (pCrawl->distance + distance[u] < distance[v]) )
 			{
 				distance[v] = distance[u] + pCrawl->distance;
-				//printf("v = %d \n", v);
+				pred[v] = u;
+				printf("v = %d \n", v);
 				//UPDATE DISTANCE VALUE in min heap also
 				decreaseKey(minHeap, v, distance[v]);
-				/*
-				if ( v == end_vertex )
-				{
-					//printf("here\n");
-					while( extractMin(minHeap) != NULL)
-						;
-					break;
-				}
-				*/
+								
 			}
 			pCrawl = pCrawl->next;
 		}
@@ -193,10 +195,24 @@ void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes )
 	printf("\n");
 	printArr(distance, v, start_vertex);
 	printf("\n");
+	for ( i = 0; i < graph_nodes; i++)
+	{
+		if (i != start_vertex)
+		{
+			printf("\n Distance to %d = %8.2f ", i , distance[i]);
+			printf("     Path = %d ", i);
+			j = i;
+					
+			do
+			{
+				j = pred[j];
+				printf("<- %d ", j);
+			}while (j != start_vertex);
+		}
+	}
 }
 
-
-
+//Ensure all nodes are reachable from a given start point.
 void find_reachable(graph_ptr graph, const int current, bool reach[])
 {
 	reach[current] = true;
@@ -218,15 +234,16 @@ void find_reachable(graph_ptr graph, const int current, bool reach[])
 	}
 }
 
-double get_distance(double src_lat, double src_long, double dest_lat, double dest_long)
+//Function to get haversine equation results.
+double get_distance(double src_lat, double src_long, double src_alt, double dest_lat, double dest_long, double dest_alt)
 {
 	printf("\n\nin get_distance\n");
 	//printf("zerg_src->lat %f \n", src_lat );
 	//printf("zerg_dest->lat %f \n", dest_lat );
-	return haversine_dist(src_lat, src_long, dest_lat, dest_long);
+	return haversine_dist(src_lat, src_long, src_alt, dest_lat, dest_long, dest_alt);
 }
 
-
+//Gather data from BST into the graph Adj. List Array
 void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps)
 {
 	if ( zerg != NULL)
@@ -252,7 +269,7 @@ void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root)
 	return;
 }
 
-
+//From each point, attempt to add edge that meet minimum distance requirement.
 void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 {
 	
@@ -262,6 +279,7 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 	
 	double zerg_src_lat = ((struct zerg*)zerg->key)->position.latitude.value ;
 	double zerg_src_long = ((struct zerg*)zerg->key)->position.longitude.value;
+	double zerg_src_alt = ((struct zerg*)zerg->key)->position.altitude.value;
 	int src_vertex = ((struct zerg*)zerg->key)->number;
 	
 	//printf("\n\ndest\n");
@@ -270,13 +288,14 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 	
 	double zerg_dest_lat = ((struct zerg*)root->key)->position.latitude.value;
 	double zerg_dest_long = ((struct zerg*)root->key)->position.longitude.value;
+	double zerg_dest_alt = ((struct zerg*)root->key)->position.altitude.value;
 	int dest_vertex = ((struct zerg*)root->key)->number;
 	
 	double distance = 0.00;
 	if ( root != NULL)
 	{
 		//get_distance returns value in km -> multiply by 1000 to convert to meters.
-		distance = ( get_distance( zerg_src_lat, zerg_src_long, zerg_dest_lat, zerg_dest_long) * 1000);
+		distance = ( get_distance( zerg_src_lat, zerg_src_long, zerg_src_alt, zerg_dest_lat, zerg_dest_long, zerg_dest_alt) * 1000);
 		//If distance meets minimum distance ( 1.25 yds * 0.9144) converts to meters.
 		if ( distance  > ( 1.25  * 0.9144)) 
 		{

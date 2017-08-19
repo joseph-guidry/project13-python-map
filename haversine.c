@@ -9,7 +9,7 @@
 
 
 /* Found on rosettacode.org/wiki/Haversine_formula#C */
-double haversine_dist(double lat1, double long1, double lat2, double long2)
+double haversine_dist(double lat1, double long1, double alt1, double lat2, double long2, double alt2)
 {
 	double results;
 	/*
@@ -38,8 +38,9 @@ double haversine_dist(double lat1, double long1, double lat2, double long2)
 	printf("dx = %f \n", dx);
 	printf("dy = %f \n", dy);
 	*/
-	
-	return asin(sqrt((dx * dx) + (dy * dy) + (dz * dz)) / 2) * 2 * R;
+	double height = alt1 - alt2;
+	double distance = asin(sqrt((dx * dx) + (dy * dy) + (dz * dz)) / 2) * 2 * R;
+	return sqrt((distance * distance) + (height * height));
 }	
 
 
