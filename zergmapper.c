@@ -14,6 +14,7 @@
 #define MAX 99999.99
 
 void display_zerg(const void * data);
+void display_removed(const void * data);
 void get_health(struct node * root, int health);
 void initialize_graph(graph_ptr graph, struct node * zerg, struct tree * pcaps);
 void get_all_edges(graph_ptr graph, struct node * zerg, struct node * root);
@@ -24,13 +25,12 @@ void find_reachable(graph_ptr graph, const int start, bool reach[]);
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes );
 void shortest_path_v2(graph_ptr graph, int start_node, int graph_nodes);
 
+void removeNode(graph_ptr graph, int vertex, struct node * node);
+
 int main(int argc, char **argv)
 {
 	int option, min_health;
 	option = getopt(argc, argv, "h:");
-	//printf("option : %c \n", option == -1? 'T':option);
-	//printf("option arg: %d \n", option == -1 ? 'T':atoi(optarg));
-	
 	switch (option)
 	{
 		case 'h': 
@@ -61,28 +61,14 @@ int main(int argc, char **argv)
 	//printf("\n\nprinting nodes\n\n");
 	//preOrder(pcap_nodes->head, display_zerg);
 	//get_health(pcap_nodes->head, min_health);  -> HOw to handle zergs with 0 hit points.
-
+	
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
-	
-	//printf("entering initialize \n\n");
 	initialize_graph(dir_graph, pcap_nodes->head, pcap_nodes);
-	//printf("exiting initialize \n");
-	
 	remove_tree(pcap_nodes);
-	/* read files  */
-		/*check for options */
-	
-	/* New pcap == new zerg_struct */
-	/* Add destination ID */
-	/* evaluate zerg packet/header information */
-		/* Output health status lower than percentage with -h option / 10% by default */
-	
-	/* Use decode .c to build the BST */
-	
+	/*
 	printf("\nDIRECTED GRAPH");
 	displayGraph(dir_graph);
-	
-	
+	*/
 	/* GETTING THE REACHABILITY of ALL NODES */
 	int i;
 	bool * reach = NULL;
@@ -93,27 +79,77 @@ int main(int argc, char **argv)
 		reach[i] = false;
 	}
 	
+	//Create a tree to hold the removed zergs src_id;
+	struct tree * removed_nodes = create_tree();
+	removed_nodes->head = NULL;
 	printf("getting reachability of all nodes from a single point\n");
 	find_reachable(dir_graph, 0, reach);
 	
 	for (i = 0; i < nodes; i++)
 	{
 		printf("reach[%d]=%d \n", i, reach[i]);
+		if ( reach[i] == 0)
+		{
+			printf("node = unreachable\n");
+			removeNode(dir_graph, i, removed_nodes->head);
+			printf("printing the removed zergs \n");
+			preOrder(removed_nodes->head, display_removed);
+		}
 	} 
-	//int * path = malloc(sizeof(int) * nodes);
+	
+	displayGraph(dir_graph);
+	
+	
+	
+	/*
 	printf("running dijkstras !!!! \n");
 	shortest_path(dir_graph, 0, nodes);
 	printf("\n");
+	*/
 	/*
+	
 	for ( int x = 0; x < nodes; x++)
 	{
-		printf("starting at %d \n", x );
-		shortest_path_v2(dir_graph, x, nodes);
+		for ( int y = 0; y < nodes y++)
+		{
+			printf("starting at %d \n", x );
+			shortest_path_v2(dir_graph, x, nodes);
+			// -> return a tu
+		}
 	}
 	*/
 	free(reach);
 	destroyGraph(dir_graph);	
 	return 0;
+}
+
+
+void removeNode(graph_ptr graph, int node, struct node * root )
+{
+	while ( graph->adjListArr[node].head != NULL)
+	{
+		printf("edge vertex to del: %d \n",  graph->adjListArr[node].head->vertex);
+		int edge_node = graph->adjListArr[node].head->vertex;
+		printf("inserting zerg: [%u] \n", graph->adjListArr[node].head->src_ID);
+		root = insert(root, graph->adjListArr[node].head->src_ID, sizeof(uint16_t), get_root_srcID);
+		removeEdge(graph, node, edge_node);
+		removeEdge(graph,  edge_node, node);
+	}
+}
+
+void display_zerg(const void * data)
+{
+	printf("display node\n");
+	printf("zerg_id: %u \n", ((struct zerg*)data)->srcID );
+	printf("zerg_lat: %06f \n",  ((struct zerg*)data)->position.latitude.value );
+	printf("zerg_long: %06f \n",  ((struct zerg*)data)->position.longitude.value );
+	printf("zerg_alt: %06f \n",  ((struct zerg*)data)->position.altitude.value );
+	printf("\n");
+}
+void display_removed(const void * data)
+{
+	printf("display node\n");
+	printf("zerg: %u \n", *((uint16_t *)data));
 }
 
 void get_health(struct node * root, int min_health)
@@ -129,6 +165,15 @@ void get_health(struct node * root, int min_health)
 	}
 	return;
 }
+
+/*
+ Find two paths? 
+	Use min heap with first run of dijkstra
+	Use max heap with first run of dijkstra
+	- This would get the shortest and longest path...remove edges of overlapping paths?
+
+*/
+
 
 // THe Dijkstra algorithm
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes)
@@ -274,7 +319,7 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 {
 	
 	//printf("\n\nsrc\n");
-	//printf("zerg_src->lat %f \n", ((struct zerg*)zerg->key)->position.latitude.value );
+	printf("zerg_src->lat %f \n", ((struct zerg*)zerg->key)->position.latitude.value );
 	//printf("zerg_src->long %f \n", ((struct zerg*)zerg->key)->position.longitude.value );
 	
 	double zerg_src_lat = ((struct zerg*)zerg->key)->position.latitude.value ;
@@ -283,8 +328,8 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 	int src_vertex = ((struct zerg*)zerg->key)->number;
 	
 	//printf("\n\ndest\n");
-	//printf("zerg_dest->lat %f \n", ((struct zerg*)root->key)->position.latitude.value );
-	//printf("zerg_dest->long %f \n", ((struct zerg*)root->key)->position.longitude.value );
+	printf("zerg_dest->lat %f \n", ((struct zerg*)root->key)->position.latitude.value );
+	printf("zerg_dest->long %f \n", ((struct zerg*)root->key)->position.longitude.value );
 	
 	double zerg_dest_lat = ((struct zerg*)root->key)->position.latitude.value;
 	double zerg_dest_long = ((struct zerg*)root->key)->position.longitude.value;
@@ -313,14 +358,4 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 		}
 	}
 	return;
-}
-
-void display_zerg(const void * data)
-{
-	printf("display node\n");
-	printf("zerg_id: %u \n", ((struct zerg*)data)->srcID );
-	printf("zerg_lat: %06f \n",  ((struct zerg*)data)->position.latitude.value );
-	printf("zerg_long: %06f \n",  ((struct zerg*)data)->position.longitude.value );
-	printf("zerg_alt: %06f \n",  ((struct zerg*)data)->position.altitude.value );
-	printf("\n");
 }

@@ -3,8 +3,8 @@
 FILE * fillGpsPayload (FILE *fp, struct zerg * zerg_info)
 {
 	struct gpsDataPayload pcap;
-	double f_coordinate;
-	int direction;
+	double f_coordinate = 0.00;;
+	int direction = 0;
 	uint64_t longitude, latitude; 
 	fread(&pcap, 1, 32, fp);
 	
@@ -28,10 +28,12 @@ FILE * fillGpsPayload (FILE *fp, struct zerg * zerg_info)
 	degreesConvertDMS(f_coordinate);
 	//printf(" %c )\n", direction ? 'W':'E');
 	
-	//printf("Altitude:  %.6fm\n", (convertBin32toDecimal(htonl(pcap.altitude) & 0x7FFFFFFF) )* 1.8288);
-	//printf("Bearing:   %.6f deg.\n", convertBin32toDecimal(htonl(pcap.bearing)& 0x7FFFFFFF) );
-	//printf("Speed:     %ukm/h\n", (int)((convertBin32toDecimal(htonl(pcap.speed)& 0x7FFFFFFF) ) * 3.6));
-	//printf("Accuracy:  %um\n", (int) convertBin32toDecimal(htonl(pcap.accuracy)));
+	/*
+	printf("Altitude:  %.6fm\n", (convertBin32toDecimal(htonl(pcap.altitude) & 0x7FFFFFFF) )* 1.8288);
+	printf("Bearing:   %.6f deg.\n", convertBin32toDecimal(htonl(pcap.bearing)& 0x7FFFFFFF) );
+	printf("Speed:     %ukm/h\n", (int)((convertBin32toDecimal(htonl(pcap.speed)& 0x7FFFFFFF) ) * 3.6));
+	printf("Accuracy:  %um\n", (int) convertBin32toDecimal(htonl(pcap.accuracy)));
+	*/
 	
 	return fp;
 }

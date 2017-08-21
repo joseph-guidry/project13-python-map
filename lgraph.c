@@ -24,6 +24,12 @@ adjlist_node_ptr createNode(int v, uint16_t src_id, double distance)
 	return newNode;
 }
 
+/* Create funciton to destroy the old node */
+void destroyNode(adjlist_node_ptr old_node)
+{
+	free(old_node);
+}
+
 /* Function to greate a graph with N vertices; creates both types of graphs(Undirected and directed)*/
 graph_ptr createGraph(int n, graph_type type)
 {
@@ -38,7 +44,6 @@ graph_ptr createGraph(int n, graph_type type)
 	//Create adj. list array
 	graph->adjListArr = (adjlist_ptr)malloc(n * sizeof(adjlist));
 	if (!graph->adjListArr)
-		//err_exit("
 		fprintf(stderr, "Unable to allocate memory for adj.list array\n");
 		
 	for(i = 0; i < n; i++)
@@ -99,6 +104,55 @@ void addEdge(graph * graph, int src, uint16_t src_id, int dest, uint16_t dest_id
 	
 }
 
+
+// Made to remove nodes that have only 1 edge -> add to the removed_zerg BST
+// Remove edges from dijstra shortest path -> add to the tree
+void removeEdge(graph * graph, int src, int dest)
+{
+	adjlist_node_ptr current, previous;
+	
+	current = graph->adjListArr[src].head;
+	printf("in Remove Edge \n");
+	// Remove the first / only node in the list
+	if ( current->next == NULL)
+	{
+		printf("destroy only node in the lsit\n");
+		graph->adjListArr[src].head = graph->adjListArr[src].head->next;
+		destroyNode(current);
+		return;
+	}
+	// Traverse until the node to delete is found
+	while ( (current != NULL) && (current->vertex != dest) )
+	{
+		printf("The current node is %d \n", current->vertex);
+		previous = current;
+		current = current->next;
+	}
+	printf("after while: current = %c \n", current == NULL ? 'T':'F');
+	if ( current == NULL )
+	{
+		printf("Not found in the list \n");
+	}
+	else
+	{
+		// if dest is found and at the head of the list
+		if ( graph->adjListArr[src].head == current )
+		{
+			graph->adjListArr[src].head = current->next;
+			destroyNode(current);
+		}
+		// if dest is found and in the middle/end of the list
+		else
+		{
+			printf("trying node in linked list\n");
+			previous->next = current->next == NULL ? NULL: current->next;
+			printf("here\n");
+			destroyNode(current);
+		}
+	}
+	return;
+}
+
 /* Graph display function */
 void displayGraph(graph_ptr graph)
 {
@@ -109,7 +163,7 @@ void displayGraph(graph_ptr graph)
 		printf("\n%d: ", i);
 		while ( adjListPtr)
 		{
-			printf("%d:%u->", adjListPtr->vertex, adjListPtr->src_ID);
+			printf("%d:%04u-> ", adjListPtr->vertex, adjListPtr->src_ID);
 			adjListPtr = adjListPtr->next;
 		}
 		printf("NULL\n");

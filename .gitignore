@@ -2,4 +2,6 @@
 *.a
 *~
 *.o
+*Test*
 *test*
+*driver*

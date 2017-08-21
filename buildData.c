@@ -44,7 +44,7 @@ FILE * buildPacketData( struct zergPacket * pcap, FILE *fp )
 	if (htons(ethertest.etherType) == IP_Vr4)
 	{
 		fread(&iptest, 1, 20,  fp);
-		printf("here ip version: %u \n", iptest.ipv4.ver_header >> 4);
+		//printf("here ip version: %u \n", iptest.ipv4.ver_header >> 4);
 	}
 	else if ( htons(ethertest.etherType) == IP_Vr6)
 	{

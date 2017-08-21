@@ -31,11 +31,17 @@ void remove_tree(struct tree * old_tree)
 struct node * newNode ( unsigned int size)
 {
 	//*build the zerg structure
-	//printf("making a node with size = %d \n", size);
-	struct node * node = (struct node*)malloc(sizeof(struct node));
-	node->key = malloc(size);
-	node->left = node->right = NULL;
-	return (node);
+	printf("making a node with size = %d \n", size);
+	struct node * node = malloc(sizeof(*node));
+	//printf("after malloc\n");
+	if ( node != NULL)
+	{
+		node->key = malloc(size);
+		node->left = node->right = NULL;
+		//printf("here in newNode\n");
+		return (node);
+	}
+	return NULL;
 }
 
 void delNode(struct node * root)
@@ -146,7 +152,9 @@ void preOrder(struct node * root, void (*display)(const void * data))
 {
 	if (root != NULL)
 	{
+		printf("here\n");
 		display(root->key);
+		printf("next\n");
 		preOrder(root->left, display);
 		preOrder(root->right, display);
 	}
@@ -163,14 +171,16 @@ struct node * insert(struct node *root, uint16_t src, unsigned int size, uint16_
 	//Find node if present
 	root = splay(root, src, get_srcID);
 	//printf("return from splaying\n");
+	uint16_t src_ID = get_srcID(root->key);
+	
 	//If found
-	if ( get_srcID(root->key) == src) 
+	if ( src_ID == src) 
 		return root;
 	//printf("here after splaying node\n");
-	struct node * newnode = newNode(src);
+	struct node * newnode = newNode(size);
 	
 	//Make root as right child of newnode -> copy left child of root to newNode
-	if ( get_srcID(root->key) > src)
+	if ( src_ID > src)
 	{
 		newnode->right = root;
 		newnode->left = root->left;

@@ -35,9 +35,6 @@ struct node * decode (int argc, char **argv, int * node_count)
 	}
 	
 	struct node * root = NULL;
-	//struct node * root = tree->head;
-	
-	
 	
 	//Iterate pcap build for a sequence of files from the command line
 	for ( file = 1; file < argc; file++) 
@@ -51,30 +48,38 @@ struct node * decode (int argc, char **argv, int * node_count)
 		//Attempt to as many pcaps in a singe file.
 			while((ftell(fp) < filesize) && ((filesize - ftell(fp)) > 60))
 			{
+				
 			
 				fp = buildPacketData(&pcapfile, fp);
-				//printf("\nVersion: %x \n", htonl(pcapfile.pcapZerg.ver_type_totalLen) >> 28);
-				//printf("Sequence: %u \n", htonl(pcapfile.pcapZerg.seqID));
-				//printf("From: %u\n", htons(pcapfile.pcapZerg.destID));
-				//printf("To: %u\n", htons(pcapfile.pcapZerg.sourceID));
+
+				/*
+				printf("\nVersion: %x \n", htonl(pcapfile.pcapZerg.ver_type_totalLen) >> 28);
+				printf("Sequence: %u \n", htonl(pcapfile.pcapZerg.seqID));
+				printf("From: %u\n", htons(pcapfile.pcapZerg.sourceID));
+				printf("To: %u\n", htons(pcapfile.pcapZerg.destID));
+				*/
+				
 				msgType = ((htonl(pcapfile.pcapZerg.ver_type_totalLen) >> 24) & 0x0f);
-			
-				struct zerg * zerg_info = create_zerg( htons(pcapfile.pcapZerg.destID) );
-			
+				// Create the zerg_info structure
+				printf("going into zerg_info\n");
+				struct zerg * zerg_info = create_zerg( htons(pcapfile.pcapZerg.sourceID) );
+				printf("here1\n");
 				switch (msgType)
 				{
 					case 0:
+						printf("getting msg payload\n");
 						fp = printMsgPayload(&pcapfile, fp);
 						break;
 					case 1:
-						//printf("getting status data\n");
+						printf("getting status data\n");
 						fp = fillStatusPayload(&pcapfile, fp, zerg_info);
 						break;
 					case 2:
+						printf("getting cmd payload\n");
 						fp = printCmdPayload(fp);
 						break;
 					case 3:
-						//printf("getting gps data\n");
+						printf("getting gps data\n");
 						fp = fillGpsPayload(fp, zerg_info);
 						break;
 					default:
@@ -98,6 +103,8 @@ struct node * decode (int argc, char **argv, int * node_count)
 				printf("zerg long: %d \n", zerg_info->health.max_points;	
 				
 				*/
+				printf("here! %lu\n", sizeof(struct zerg));
+				
 				root = insert(root, zerg_info->srcID, sizeof(struct zerg), get_root_srcID);
 				//printf("key = null ? %c \n", (((struct zerg*)root->key)->srcID) == 0 ? 'T': 'F');
 				if(   ! (((struct zerg*)root->key)->srcID)  )
@@ -105,12 +112,12 @@ struct node * decode (int argc, char **argv, int * node_count)
 				{
 					if( msgType == 1)
 					{
-						printf("updating status on zerg\n");
+						printf("adding status on zerg\n");
 					}
 					//	update gps data
 					else if ( msgType == 3)
 					{
-						//printf("Adding new zerg with gps data\n");
+						printf("Adding new zerg with gps data\n");
 						//printf("here!  %d\n", *node_count);
 						((struct zerg*)root->key)->number = (*node_count);
 						((struct zerg*)root->key)->srcID = zerg_info->srcID;
@@ -146,7 +153,7 @@ struct node * decode (int argc, char **argv, int * node_count)
 					/* modifiy the data in the root->key data fields */
 				}
 			
-			
+				/*
 				//HANDLE PADDING OR BLANK FCS at end of the pcap.
 				fread(filename, 1, 4, fp);
 				for (unsigned int x = 0; x < strlen(filename); x++)
@@ -158,7 +165,8 @@ struct node * decode (int argc, char **argv, int * node_count)
 						break;
 					}
 				}
-				zerg_info = NULL;
+				*/
+				printf("here\n");
 			}
 		}
 		if (fp != NULL)
@@ -176,9 +184,12 @@ struct node * decode (int argc, char **argv, int * node_count)
 
 struct zerg * create_zerg(unsigned int src_id)
 {
+	printf("inside create zerg: %u\n", src_id);
 	struct zerg * new_zerg = malloc(sizeof(struct zerg));
-	new_zerg->srcID = src_id;
-	
+	printf("making zerg\n");
+	if ( new_zerg )
+		new_zerg->srcID = src_id;
+	printf("returning new_zerg\n");
 	return new_zerg;	
 	
 }

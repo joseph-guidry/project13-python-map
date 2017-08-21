@@ -25,22 +25,17 @@ typedef struct adjlist
 /*An array of adjacency lists. Size of array == number of vertices. */
 typedef struct graph
 {
-	graph_type type;					/*Directed or Undirected*/
-	int num_vertices;					/* number of vertices in graph*/
+	graph_type type;						/*Directed or Undirected*/
+	int num_vertices;						/* number of vertices in graph*/
 	adjlist_ptr adjListArr; 				/* adj. list array */
 }graph, *graph_ptr;
-
-/* Exit function */
-__inline void err_exit(char * msg)
-{
-	printf("[Fatal Error]: %s \nExiting...\n", msg);
-	exit(1);
-}
 
 adjlist_node_ptr createNode(int v, uint16_t src, double distance);
 graph_ptr createGraph(int n, graph_type type);
 void destroyGraph(graph_ptr graph);
 void addEdge(graph * graph, int src, uint16_t src_id, int dest, uint16_t dest_id, double distance);
+void removeEdge(graph * graph, int src, int dest);
+
 void displayGraph(graph_ptr graph);
 
 #endif

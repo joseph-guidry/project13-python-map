@@ -26,7 +26,8 @@ decodelib.a: decode.c splay.c buildData.c cmdPayload.c conversion.c gpsPayload.c
 	gcc -c splay.c -o splay.o
 	ar r decodelib.a buildData.o cmdPayload.o conversion.o gpsPayload.o msgPayload.o statusPayload.o decode.o splay.o	
 	
-debug:
+debug: zergmapper.c  decodelib.a lgraph.o haversine.o min_heap.o decode.h splay.h lgraph.h haversine.h min_heap.h
+	gcc $(CFLAGS) -g -o zergmapper zergmapper.c decodelib.a lgraph.o haversine.o min_heap.o -lm
 
 profile:
 

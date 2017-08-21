@@ -73,8 +73,8 @@ struct udpHeader {
 
 struct zergHeader {
 	uint32_t ver_type_totalLen;					//Psychic Format version = 1
-	uint16_t sourceID;
 	uint16_t destID;
+	uint16_t sourceID;
 	uint32_t seqID;
 };
 
@@ -148,4 +148,5 @@ uint64_t swapLong( uint64_t x);
 void degreesConvertDMS( double degrees);
 
 struct node * decode(int argc, char **argv, int * nodes);
+uint16_t get_root_srcID(void * data);
 
