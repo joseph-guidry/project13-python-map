@@ -25,7 +25,7 @@ void find_reachable(graph_ptr graph, const int start, bool reach[]);
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes );
 void shortest_path_v2(graph_ptr graph, int start_node, int graph_nodes);
 
-struct node * removeNode(graph_ptr graph, int vertex, struct node * node);
+struct node * removeNode(graph_ptr graph, int node, struct node * root, int * count );
 
 int main(int argc, char **argv)
 {
@@ -66,8 +66,8 @@ int main(int argc, char **argv)
 	initialize_graph(dir_graph, pcap_nodes->head, pcap_nodes);
 	
 	remove_tree(pcap_nodes);
-	printf("\nDIRECTED GRAPH");
-	displayGraph(dir_graph);
+	printf("\nDIRECTED GRAPH\n");
+	//displayGraph(dir_graph);
 	
 	/* GETTING THE REACHABILITY of ALL NODES */
 	int i;
@@ -87,18 +87,39 @@ int main(int argc, char **argv)
 	
 	for (i = 0; i < nodes; i++)
 	{
-		//printf("reach[%d]=%d \n", i, reach[i]);
+		printf("reach[%d]=%d \n", i, reach[i]);
 		if ( reach[i] == 0)
 		{
 			//printf("node = unreachable\n");
-			removed_nodes->head = removeNode(dir_graph, i, removed_nodes->head);
+			//If node is unreachable, remove it from the graph -> add to BST.
+			removed_nodes->head = removeNode(dir_graph, i, removed_nodes->head, &removed_nodes->count);
 		}
 	} 
+	printf("\nUPDATED DIRECTED GRAPH");
+	displayGraph(dir_graph);
+	printf("\n");
+	
+	for ( i = 0; i < nodes; i++)
+	{
+		printf("Node [%d]: %d edges \n", i, dir_graph->adjListArr[i].num_members);
+		if(  dir_graph->adjListArr[i].num_members < 2)
+		{
+			removed_nodes->head = removeNode(dir_graph, i, removed_nodes->head, &removed_nodes->count);
+		}
+	}
+	
+	printf("Number of nodes in removed_nodes: %d \n", removed_nodes->count );
+	printf("Percentage: %.2f \n", (removed_nodes->count / (double)nodes) );
+	
+	if (  ( (removed_nodes->count / (double)nodes ) * 100) > 50.0)
+	{
+		printf("Removed more than 50%% of zergs : Not Zerg Connected \n");
+		return 1;
+	}
 	
 	printf("\nUPDATED DIRECTED GRAPH");
 	displayGraph(dir_graph);
 	preOrder(removed_nodes->head, display_removed);
-	
 	
 	/*
 	printf("running dijkstras !!!! \n");
@@ -117,6 +138,8 @@ int main(int argc, char **argv)
 		}
 	}
 	*/
+
+	
 	free(reach);
 	destroyGraph(dir_graph);
 	remove_tree(removed_nodes);	
@@ -124,11 +147,12 @@ int main(int argc, char **argv)
 }
 
 
-struct node * removeNode(graph_ptr graph, int node, struct node * root )
+struct node * removeNode(graph_ptr graph, int node, struct node * root, int * count )
 {
 	//printf("inserting node %d to be removed\n", node);
 	//Create a node for the node to be inserted
 	root = insert(root, node, sizeof(int), get_root_srcID);
+	(*count)++;
 	//Assign the data to the node
 	*((uint16_t*)(root->key)) = node;
 	while ( graph->adjListArr[node].head != NULL)
@@ -286,7 +310,7 @@ void find_reachable(graph_ptr graph, const int current, bool reach[])
 //Function to get haversine equation results.
 double get_distance(double src_lat, double src_long, double src_alt, double dest_lat, double dest_long, double dest_alt)
 {
-	printf("\n\nin get_distance\n");
+	//printf("\n\nin get_distance\n");
 	//printf("zerg_src->lat %f \n", src_lat );
 	//printf("zerg_dest->lat %f \n", dest_lat );
 	return haversine_dist(src_lat, src_long, src_alt, dest_lat, dest_long, dest_alt);
@@ -323,42 +347,40 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root)
 {
 	
 	//printf("\n\nsrc\n");
-	printf("zerg_src->lat %f \n", ((struct zerg*)zerg->key)->position.latitude.value );
+	//printf("zerg_src->lat %f \n", ((struct zerg*)zerg->key)->position.latitude.value );
 	//printf("zerg_src->long %f \n", ((struct zerg*)zerg->key)->position.longitude.value );
 	
-	double zerg_src_lat = ((struct zerg*)zerg->key)->position.latitude.value ;
-	double zerg_src_long = ((struct zerg*)zerg->key)->position.longitude.value;
-	double zerg_src_alt = ((struct zerg*)zerg->key)->position.altitude.value;
+	double src_lat = ((struct zerg*)zerg->key)->position.latitude.value ;
+	double src_long = ((struct zerg*)zerg->key)->position.longitude.value;
+	double src_alt = ((struct zerg*)zerg->key)->position.altitude.value;
 	int src_vertex = ((struct zerg*)zerg->key)->number;
 	
 	//printf("\n\ndest\n");
-	printf("zerg_dest->lat %f \n", ((struct zerg*)root->key)->position.latitude.value );
-	printf("zerg_dest->long %f \n", ((struct zerg*)root->key)->position.longitude.value );
+	//printf("zerg_dest->lat %f \n", ((struct zerg*)root->key)->position.latitude.value );
+	//printf("zerg_dest->long %f \n", ((struct zerg*)root->key)->position.longitude.value );
 	
-	double zerg_dest_lat = ((struct zerg*)root->key)->position.latitude.value;
-	double zerg_dest_long = ((struct zerg*)root->key)->position.longitude.value;
-	double zerg_dest_alt = ((struct zerg*)root->key)->position.altitude.value;
+	double dest_lat = ((struct zerg*)root->key)->position.latitude.value;
+	double dest_long = ((struct zerg*)root->key)->position.longitude.value;
+	double dest_alt = ((struct zerg*)root->key)->position.altitude.value;
 	int dest_vertex = ((struct zerg*)root->key)->number;
 	
 	double distance = 0.00;
 	if ( root != NULL)
 	{
 		//get_distance returns value in km -> multiply by 1000 to convert to meters.
-		distance = ( get_distance( zerg_src_lat, zerg_src_long, zerg_src_alt, zerg_dest_lat, zerg_dest_long, zerg_dest_alt) * 1000);
+		distance = ( get_distance(src_lat, src_long, src_alt, dest_lat, dest_long, dest_alt) * 1000);
 		//If distance meets minimum distance ( 1.25 yds * 0.9144) converts to meters.
 		if ( distance  > ( 1.25  * 0.9144)) 
 		{
-			printf("distance = %f \n", distance);
+			//printf("distance = %f \n", distance);
 			//If distance does not exceed max distance of 15 meters.
 			if (distance > 15)
 			{
-				printf("over 15 mdistance = %f \n", distance);
-			
+				//printf("over 15 mdistance = %f \n", distance);
 				return;
 			}
-			printf("distance is withing range!!!! \n");
-			addEdge(graph, src_vertex, ((struct zerg*)zerg->key)->srcID, dest_vertex, ((struct zerg*)root->key)->srcID, distance);
-			//printf("after addEdge\n");
+			//printf("distance is withing range!!!! \n");
+			addEdge(graph, src_vertex,((struct zerg*)zerg->key)->srcID, dest_vertex,((struct zerg*)root->key)->srcID, distance);
 		}
 	}
 	return;
