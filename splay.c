@@ -31,7 +31,7 @@ void remove_tree(struct tree * old_tree)
 struct node * newNode ( unsigned int size)
 {
 	//*build the zerg structure
-	printf("making a node with size = %d \n", size);
+	//printf("making a node with size = %d \n", size);
 	struct node * node = malloc(sizeof(*node));
 	//printf("after malloc\n");
 	if ( node != NULL)
@@ -152,15 +152,13 @@ void preOrder(struct node * root, void (*display)(const void * data))
 {
 	if (root != NULL)
 	{
-		printf("here\n");
 		display(root->key);
-		printf("next\n");
 		preOrder(root->left, display);
 		preOrder(root->right, display);
 	}
 }
 
-struct node * insert(struct node *root, uint16_t src, unsigned int size, uint16_t (*get_srcID)(void * data) )
+struct node * insert(struct node * root, uint16_t src, unsigned int size, uint16_t (*get_srcID)(void * data) )
 {
 
 	//printf("inserting src: %u \n", src);
@@ -172,7 +170,7 @@ struct node * insert(struct node *root, uint16_t src, unsigned int size, uint16_
 	root = splay(root, src, get_srcID);
 	//printf("return from splaying\n");
 	uint16_t src_ID = get_srcID(root->key);
-	
+	//printf("src_ID = %u\n", src_ID);
 	//If found
 	if ( src_ID == src) 
 		return root;

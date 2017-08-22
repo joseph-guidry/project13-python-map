@@ -112,11 +112,11 @@ void removeEdge(graph * graph, int src, int dest)
 	adjlist_node_ptr current, previous;
 	
 	current = graph->adjListArr[src].head;
-	printf("in Remove Edge \n");
+	//printf("in Remove Edge \n");
 	// Remove the first / only node in the list
 	if ( current->next == NULL)
 	{
-		printf("destroy only node in the lsit\n");
+		//printf("destroy only node in the lsit\n");
 		graph->adjListArr[src].head = graph->adjListArr[src].head->next;
 		destroyNode(current);
 		return;
@@ -124,11 +124,11 @@ void removeEdge(graph * graph, int src, int dest)
 	// Traverse until the node to delete is found
 	while ( (current != NULL) && (current->vertex != dest) )
 	{
-		printf("The current node is %d \n", current->vertex);
+		//printf("The current node is %d \n", current->vertex);
 		previous = current;
 		current = current->next;
 	}
-	printf("after while: current = %c \n", current == NULL ? 'T':'F');
+	//printf("after while: current = %c \n", current == NULL ? 'T':'F');
 	if ( current == NULL )
 	{
 		printf("Not found in the list \n");
@@ -144,9 +144,9 @@ void removeEdge(graph * graph, int src, int dest)
 		// if dest is found and in the middle/end of the list
 		else
 		{
-			printf("trying node in linked list\n");
+			//printf("trying node in linked list\n");
 			previous->next = current->next == NULL ? NULL: current->next;
-			printf("here\n");
+			//printf("here\n");
 			destroyNode(current);
 		}
 	}

@@ -25,7 +25,7 @@ void find_reachable(graph_ptr graph, const int start, bool reach[]);
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes );
 void shortest_path_v2(graph_ptr graph, int start_node, int graph_nodes);
 
-void removeNode(graph_ptr graph, int vertex, struct node * node);
+struct node * removeNode(graph_ptr graph, int vertex, struct node * node);
 
 int main(int argc, char **argv)
 {
@@ -64,11 +64,11 @@ int main(int argc, char **argv)
 	
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
 	initialize_graph(dir_graph, pcap_nodes->head, pcap_nodes);
+	
 	remove_tree(pcap_nodes);
-	/*
 	printf("\nDIRECTED GRAPH");
 	displayGraph(dir_graph);
-	*/
+	
 	/* GETTING THE REACHABILITY of ALL NODES */
 	int i;
 	bool * reach = NULL;
@@ -82,23 +82,22 @@ int main(int argc, char **argv)
 	//Create a tree to hold the removed zergs src_id;
 	struct tree * removed_nodes = create_tree();
 	removed_nodes->head = NULL;
-	printf("getting reachability of all nodes from a single point\n");
+	//printf("getting reachability of all nodes from a single point\n");
 	find_reachable(dir_graph, 0, reach);
 	
 	for (i = 0; i < nodes; i++)
 	{
-		printf("reach[%d]=%d \n", i, reach[i]);
+		//printf("reach[%d]=%d \n", i, reach[i]);
 		if ( reach[i] == 0)
 		{
-			printf("node = unreachable\n");
-			removeNode(dir_graph, i, removed_nodes->head);
-			printf("printing the removed zergs \n");
-			preOrder(removed_nodes->head, display_removed);
+			//printf("node = unreachable\n");
+			removed_nodes->head = removeNode(dir_graph, i, removed_nodes->head);
 		}
 	} 
 	
+	printf("\nUPDATED DIRECTED GRAPH");
 	displayGraph(dir_graph);
-	
+	preOrder(removed_nodes->head, display_removed);
 	
 	
 	/*
@@ -119,22 +118,27 @@ int main(int argc, char **argv)
 	}
 	*/
 	free(reach);
-	destroyGraph(dir_graph);	
+	destroyGraph(dir_graph);
+	remove_tree(removed_nodes);	
 	return 0;
 }
 
 
-void removeNode(graph_ptr graph, int node, struct node * root )
+struct node * removeNode(graph_ptr graph, int node, struct node * root )
 {
+	//printf("inserting node %d to be removed\n", node);
+	//Create a node for the node to be inserted
+	root = insert(root, node, sizeof(int), get_root_srcID);
+	//Assign the data to the node
+	*((uint16_t*)(root->key)) = node;
 	while ( graph->adjListArr[node].head != NULL)
 	{
-		printf("edge vertex to del: %d \n",  graph->adjListArr[node].head->vertex);
+		//printf("edge vertex to del: [%d] \n",  graph->adjListArr[node].head->vertex);
 		int edge_node = graph->adjListArr[node].head->vertex;
-		printf("inserting zerg: [%u] \n", graph->adjListArr[node].head->src_ID);
-		root = insert(root, graph->adjListArr[node].head->src_ID, sizeof(uint16_t), get_root_srcID);
 		removeEdge(graph, node, edge_node);
-		removeEdge(graph,  edge_node, node);
+		removeEdge(graph, edge_node, node);
 	}
+	return root;
 }
 
 void display_zerg(const void * data)
@@ -148,8 +152,8 @@ void display_zerg(const void * data)
 }
 void display_removed(const void * data)
 {
-	printf("display node\n");
-	printf("zerg: %u \n", *((uint16_t *)data));
+	printf("removing node: ");
+	printf("zerg: [%u] \n", *((uint16_t*)(data)) );
 }
 
 void get_health(struct node * root, int min_health)

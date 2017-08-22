@@ -107,7 +107,7 @@ struct node * decode (int argc, char **argv, int * node_count)
 				
 				root = insert(root, zerg_info->srcID, sizeof(struct zerg), get_root_srcID);
 				//printf("key = null ? %c \n", (((struct zerg*)root->key)->srcID) == 0 ? 'T': 'F');
-				if(   ! (((struct zerg*)root->key)->srcID)  )
+				if(   ! ((struct zerg*)root->key)->srcID )
 				//if root = null -> new node then key == null
 				{
 					if( msgType == 1)
@@ -166,7 +166,10 @@ struct node * decode (int argc, char **argv, int * node_count)
 					}
 				}
 				*/
-				printf("here\n");
+				//Free the malloc'd data in making a zerg info struct from pcap data.
+				free(zerg_info) ;
+				//printf("key = null ? %c \n", zerg_info == NULL ? 'T':'F');
+				//printf("here\n");
 			}
 		}
 		if (fp != NULL)
