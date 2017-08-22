@@ -1,6 +1,8 @@
 #include "decode.h"
 #include "splay.h"
 
+#define NO_GPS 1000.00
+
 struct zerg * create_zerg(unsigned int dest_id);
 void destroy_zerg(struct zerg * old_zerg);
 
@@ -67,19 +69,19 @@ struct node * decode (int argc, char **argv, int * node_count)
 				switch (msgType)
 				{
 					case 0:
-						printf("getting msg payload\n");
+						//printf("getting msg payload\n");
 						fp = printMsgPayload(&pcapfile, fp);
 						break;
 					case 1:
-						printf("getting status data\n");
+						//printf("getting status data\n");
 						fp = fillStatusPayload(&pcapfile, fp, zerg_info);
 						break;
 					case 2:
-						printf("getting cmd payload\n");
+						//printf("getting cmd payload\n");
 						fp = printCmdPayload(fp);
 						break;
 					case 3:
-						printf("getting gps data\n");
+						//printf("getting gps data\n");
 						fp = fillGpsPayload(fp, zerg_info);
 						break;
 					default:
@@ -112,15 +114,19 @@ struct node * decode (int argc, char **argv, int * node_count)
 				{
 					if( msgType == 1)
 					{
-						printf("adding status on zerg\n");
-						//((struct zerg*)root->key)->health.hit_points.value;
-						//((struct zerg*)root->key)->health.max_points.valueclear
+						//printf("\n\tadding status on zerg\n");
+						((struct zerg*)root->key)->number = (*node_count);
+						((struct zerg*)root->key)->srcID = zerg_info->srcID;
+						((struct zerg*)root->key)->health.hit_points = zerg_info->health.hit_points;
+						((struct zerg*)root->key)->health.max_points = zerg_info->health.max_points;
+						((struct zerg*)root->key)->position.latitude.value = NO_GPS;
+						((struct zerg*)root->key)->position.longitude.value = NO_GPS;
+						((struct zerg*)root->key)->position.altitude.value = NO_GPS;
 					}
 					//	update gps data
 					else if ( msgType == 3)
 					{
-						printf("Adding new zerg with gps data\n");
-						//printf("here!  %d\n", *node_count);
+						//printf("\t\tAdding new zerg with gps data\n");
 						((struct zerg*)root->key)->number = (*node_count);
 						((struct zerg*)root->key)->srcID = zerg_info->srcID;
 						((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
@@ -134,13 +140,9 @@ struct node * decode (int argc, char **argv, int * node_count)
 				{
 					if( msgType == 1)
 					{
-						printf("updating status on zerg\n");
-						//((struct zerg*)root->key)->health.hit_points.value;
-						//((struct zerg*)root->key)->health.max_points.value
-					}
-					else if ( msgType == 2)
-					{
-						printf("updating cmd payload stufff!\n");
+						//printf("updating status on zerg\n");
+						((struct zerg*)root->key)->health.hit_points = zerg_info->health.hit_points;
+						((struct zerg*)root->key)->health.max_points = zerg_info->health.max_points;
 					}
 					//	update gps data
 					else if ( msgType == 3)
@@ -151,9 +153,6 @@ struct node * decode (int argc, char **argv, int * node_count)
 						((struct zerg*)root->key)->position.altitude.value = zerg_info->position.altitude.value;
 					}
 					
-					//((struct zerg*)root->key)->health.hit_.value
-					//	update status items. 
-					/* modifiy the data in the root->key data fields */
 				}
 			
 				/*
@@ -169,6 +168,7 @@ struct node * decode (int argc, char **argv, int * node_count)
 					}
 				}
 				*/
+				
 				//Free the malloc'd data in making a zerg info struct from pcap data.
 				free(zerg_info) ;
 			}

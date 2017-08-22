@@ -11,7 +11,7 @@ FILE * buildPcapData(struct zergPacket * pcap, char *filename, int * filesize)
 	fp = fopen(filename, "rb");
 	if (fp == NULL)
 	{
-		fprintf(stderr, "Could not open %s \n", filename);
+		//fprintf(stderr, "Could not open %s \n", filename);
 		return NULL;;
 	}
 	//GET FILESIZE

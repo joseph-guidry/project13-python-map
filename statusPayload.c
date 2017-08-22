@@ -33,17 +33,17 @@ FILE * fillStatusPayload (struct zergPacket * pcapfile, FILE *fp, struct zerg * 
 		
 		pcap.zergName[x] = c;
 	}
-	printf("Name: %s \n", pcap.zergName);
-	printf("HP: %u/%u\n",(htonl(pcap.hitPoints) >> 8), (htonl(pcap.maxHitPoints) >> 8) );
+	//printf("Name: %s \n", pcap.zergName);
+	//printf("HP: %u/%u\n",(htonl(pcap.hitPoints) >> 8), (htonl(pcap.maxHitPoints) >> 8) );
 	
 	zerg_info->health.hit_points = (htonl(pcap.hitPoints) >> 8); 
 	zerg_info->health.max_points = (htonl(pcap.maxHitPoints) >> 8);
 	
 	getZergType(zergType, (htonl(pcap.maxHitPoints) & 0xff));
-	printf("Type: %s \n" ,zergType);
-	printf("Armor: %x \n", htonl(pcap.hitPoints) & 0xff);
+	//printf("Type: %s \n" ,zergType);
+	//printf("Armor: %x \n", htonl(pcap.hitPoints) & 0xff);
 	zergSpeed = convertBin32toDecimal(htonl(pcap.speed) & 0x7fffffff);
-	printf("MaxSpeed: %.4fm/s\n", zergSpeed);
+	//printf("MaxSpeed: %.4fm/s\n", zergSpeed);
 	free(pcap.zergName);
 	return fp; 
 }
