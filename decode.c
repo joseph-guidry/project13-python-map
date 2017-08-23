@@ -2,6 +2,7 @@
 #include "splay.h"
 
 #define NO_GPS 1000.00
+#define NO_HEALTH 10
 
 struct zerg * create_zerg(unsigned int dest_id);
 void destroy_zerg(struct zerg * old_zerg);
@@ -129,6 +130,8 @@ struct node * decode (int argc, char **argv, int * node_count)
 						//printf("\t\tAdding new zerg with gps data\n");
 						((struct zerg*)root->key)->number = (*node_count);
 						((struct zerg*)root->key)->srcID = zerg_info->srcID;
+						((struct zerg*)root->key)->health.hit_points = NO_HEALTH;
+						((struct zerg*)root->key)->health.max_points = NO_HEALTH;
 						((struct zerg*)root->key)->position.latitude.value = zerg_info->position.latitude.value;
 						((struct zerg*)root->key)->position.longitude.value = zerg_info->position.longitude.value;
 						((struct zerg*)root->key)->position.altitude.value = zerg_info->position.altitude.value;

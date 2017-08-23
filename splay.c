@@ -143,7 +143,7 @@ struct node * splay(struct node * root, uint16_t key, uint16_t (*get_srcID)(void
 	}
 }
 
-struct node * search(struct node * root, uint16_t key, uint16_t (*get_srcID)(void * data))
+struct node * search_srcID(struct node * root, uint16_t key, uint16_t (*get_srcID)(void * data))
 {
 	return splay(root, key, get_srcID );
 }
@@ -193,41 +193,6 @@ struct node * insert(struct node * root, uint16_t src, unsigned int size, uint16
 	}
 	return newnode;
 }
-/*
-int main(void)
-{
-	
-	struct node * root = newNode(100);
-	root->left = newNode(50);
-	root->right = newNode(200);
-	root->left->left = newNode(40);
-	root->left->left->left = newNode(30);
-	root->left->left->left->left = newNode(20);
-	//root = search(root, 20);
-	*/
-	/*
-	unsigned int randval;
-	FILE * fptr;
-	
-	fptr = fopen("/dev/random", "r");
-	fread(&randval, sizeof(randval), 1, fptr);
-	fclose(fptr);
-	
-	printf("randval %u\n", randval);
-	
-	struct node * root = NULL;
-	//root = insert(root, randval );
-	//srand(time(NULL));
-	for(int x = 0; x < 10; ++x)
-	{
-		printf("here\n");
-		root = insert(root, x *x *x + 5);
-	}
-	root = search(root, 5);
-	
-	preOrder(root);
-	printf("\n");
-}
-*/
+
 #endif
 

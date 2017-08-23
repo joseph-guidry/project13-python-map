@@ -28,21 +28,6 @@ void shortest_path_v2(graph_ptr graph, int start_node, int graph_nodes);
 void zerg_connected(graph_ptr graph, int start, int end, int num_nodes);
 struct node * removeNode(graph_ptr graph, int node, struct node * root, int * count );
 
-void get_health(struct node * root, int min_health)
-{
-	//printf("here in get_health \n");
-	if ( root != NULL)
-	{
-		double health_pct = (double)((struct zerg*)root->key)->health.hit_points / (double)((struct zerg*)root->key)->health.max_points;
-		//printf("health_pct = %f \n", health_pct);
-		if ( ( health_pct * 100) <= min_health )
-			printf("zerg: %d has health %d \n", ((struct zerg*)root->key)-> srcID, ((struct zerg*)root->key)->health.hit_points );
-		get_health(root->left, min_health);
-		get_health(root->right, min_health);
-	}
-	return;
-}
-
 int main(int argc, char **argv)
 {
 	int option, min_health;
@@ -74,7 +59,7 @@ int main(int argc, char **argv)
 	}
 	
 	//printf("\n\nprinting nodes\n\n");
-	//preOrder(pcap_nodes->head, display_zerg);
+	preOrder(pcap_nodes->head, display_zerg);
 	get_health(pcap_nodes->head, min_health);  //-> HOw to handle zergs with 0 hit points.
 	graph_ptr dir_graph = createGraph(nodes, DIRECTED);
 	initialize_graph(dir_graph, pcap_nodes->head, pcap_nodes);
@@ -82,7 +67,8 @@ int main(int argc, char **argv)
 	remove_tree(pcap_nodes);
 	printf("\nDIRECTED GRAPH\n");
 	displayGraph(dir_graph);
-	printf("\n");
+	
+	
 	
 	/* GETTING THE REACHABILITY of ALL NODES */
 	int i;
@@ -99,10 +85,10 @@ int main(int argc, char **argv)
 	dead_zerg->head = NULL;
 	//printf("getting reachability of all nodes from a single point\n");
 	find_reachable(dir_graph, 0, reach);
-	
+	printf("after\n");
 	for (i = 0; i < nodes; i++)
 	{
-		printf("reach[%d]=%d \n", i, reach[i]);
+		//printf("reach[%d]=%d \n", i, reach[i]);
 		if ( reach[i] == 0)
 		{
 			//printf("node = unreachable\n");
@@ -110,16 +96,17 @@ int main(int argc, char **argv)
 			dead_zerg->head = removeNode(dir_graph, i, dead_zerg->head, &dead_zerg->count);
 		}
 	} 
-	printf("\nUPDATED DIRECTED GRAPH");
+	printf("\nUPDATED after Reachable check GRAPH");
 	displayGraph(dir_graph);
 	printf("\n");
 	
 	for ( i = 0; i < nodes; i++)
 	{
-		printf("Node [%d]: %d edges \n", i, dir_graph->adjListArr[i].num_members);
+		//printf("Node [%d]: %d edges \n", i, dir_graph->adjListArr[i].num_members);
 		if(  dir_graph->adjListArr[i].num_members < 2)
 		{
-			dead_zerg->head = removeNode(dir_graph, i, dead_zerg->head, &dead_zerg->count);
+			if ( !(dir_graph->adjListArr[i].head == NULL) )
+				dead_zerg->head = removeNode(dir_graph, i, dead_zerg->head, &dead_zerg->count);
 		}
 	}
 	
@@ -129,29 +116,27 @@ int main(int argc, char **argv)
 	if (  ( (dead_zerg->count / (double)nodes ) * 100) > 50.0)
 	{
 		printf("Removed more than 50%% of zergs : Not Zerg Connected \n");
+		preOrder(dead_zerg->head, display_removed);
 		return 1;
 	}
 	
-	printf("\nUPDATED DIRECTED GRAPH");
+	printf("\nUPDATED before path finding GRAPH");
 	displayGraph(dir_graph);
-	
-	
-	//Identify a 
-	//shortest_path(dir_graph, 0, 2, nodes);
 	printf("\n");
 	
-	//void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
-	zerg_connected(dir_graph, 0, 1, nodes);
-	/*
+	int last_vertex;
+	//Find the last vertex in the graph
 	for ( int x = 0; x < nodes; x++)
 	{
-		for ( int y = 0; y < nodes; y++)
+		if ( !(dir_graph->adjListArr[x].head == NULL) )
 		{
-			printf("starting at %d \n", x );
-			zerg_connected(dir_graph, x, y, nodes);
+			last_vertex = x;
 		}
 	}
-	*/
+	
+	//Attempt to determine zerg connected by getting 2 disjoint paths from index 0 to last useable vertex;
+	zerg_connected(dir_graph, 0, last_vertex, nodes);
+	
 	
 	free(reach);
 	destroyGraph(dir_graph);
@@ -159,6 +144,22 @@ int main(int argc, char **argv)
 	preOrder(dead_zerg->head, display_removed);
 	remove_tree(dead_zerg);	
 	return 0;
+}
+
+void get_health(struct node * root, int min_health)
+{
+	//printf("here in get_health \n");
+	if ( root != NULL)
+	{
+		double health_pct = (double)((struct zerg*)root->key)->health.hit_points / (double)((struct zerg*)root->key)->health.max_points;
+		//printf("health_pct = %f \n", health_pct);
+		if ( ( health_pct * 100) <= min_health )
+			//Output the health as a percentage.
+			printf("zerg: %3d has health of %0.2f%% \n", ((struct zerg*)root->key)-> srcID, health_pct * 100);
+		get_health(root->left, min_health);
+		get_health(root->right, min_health);
+	}
+	return;
 }
 
 //Ensure all nodes are reachable from a given start point.
@@ -291,6 +292,6 @@ void display_zerg(const void * data)
 }
 void display_removed(const void * data)
 {
-	printf("removing node: ");
+	printf("removed node: ");
 	printf("zerg: [%u] \n", *((uint16_t*)(data)) );
 }
