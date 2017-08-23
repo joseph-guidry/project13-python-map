@@ -6,11 +6,11 @@
 #include "min_heap.h"
 
 //A utility funciton to create a new Min Heap Node
-struct MinHeapNode * newMinHeapNode(int v, uint16_t src_ID, double distance)
+struct MinHeapNode * newMinHeapNode(int v, double distance)
 {
 	struct MinHeapNode * minHeapNode = (struct MinHeapNode *)malloc(sizeof(struct MinHeapNode));
 	minHeapNode->v = v;
-	minHeapNode->src_ID = src_ID;
+	//minHeapNode->src_ID = src_ID;
 	minHeapNode->distance = distance;
 	return minHeapNode;
 }
@@ -98,6 +98,7 @@ struct MinHeapNode * extractMin(struct MinHeap * minHeap)
 	
 	//Store the root node
 	struct MinHeapNode * root = minHeap->array[0];
+	printf("in extractMin minheap->array[0] = %d \n", minHeap->array[0]->v);
 	
 	//Replace root with last node
 	struct MinHeapNode * lastNode = minHeap->array[minHeap->size - 1];
@@ -146,12 +147,11 @@ bool isInMinHeap(struct MinHeap * minHeap, int v)
 	return false;
 }
 
-//printing the path solution
-void printArr(double distance[], int n, int start_vertex)
+void printArr(double distance[], int n)
 {
 	printf("Vertex	Distance from source \n");
 	for (int i = 0; i < n ; i++)
 	{
-		printf("From %d to %d \t %f\n", start_vertex, i, distance[i]);
+		printf("to %d \t %0.2f\n", i, distance[i]);
 	}
 }

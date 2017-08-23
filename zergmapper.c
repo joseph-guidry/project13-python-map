@@ -7,7 +7,8 @@
 #include "splay.h"
 #include "lgraph.h"
 #include "haversine.h"
-#include "min_heap.h"
+//#include "min_heap.h"
+#include "zerg_connect.h"
 
 #define DIRECTED 1
 #define UNDIRECTED 0
@@ -24,7 +25,7 @@ void find_reachable(graph_ptr graph, const int start, bool reach[]);
 
 void shortest_path( graph_ptr graph, int start_vertex, int graph_nodes );
 void shortest_path_v2(graph_ptr graph, int start_node, int graph_nodes);
-
+void zerg_connected(graph_ptr graph, int start, int end, int num_nodes);
 struct node * removeNode(graph_ptr graph, int node, struct node * root, int * count );
 
 void get_health(struct node * root, int min_health)
@@ -72,7 +73,6 @@ int main(int argc, char **argv)
 		printf("fail to call decode\n");
 	}
 	
-	//printf("pcap_nodes->head == NULL ? %c \n", pcap_nodes->head == NULL ? 'T':'F');
 	//printf("\n\nprinting nodes\n\n");
 	//preOrder(pcap_nodes->head, display_zerg);
 	get_health(pcap_nodes->head, min_health);  //-> HOw to handle zergs with 0 hit points.
@@ -81,7 +81,8 @@ int main(int argc, char **argv)
 	
 	remove_tree(pcap_nodes);
 	printf("\nDIRECTED GRAPH\n");
-	//displayGraph(dir_graph);
+	displayGraph(dir_graph);
+	printf("\n");
 	
 	/* GETTING THE REACHABILITY of ALL NODES */
 	int i;
@@ -133,126 +134,32 @@ int main(int argc, char **argv)
 	
 	printf("\nUPDATED DIRECTED GRAPH");
 	displayGraph(dir_graph);
-	preOrder(dead_zerg->head, display_removed);
 	
 	
-	printf("running dijkstras !!!! \n");
 	//Identify a 
 	//shortest_path(dir_graph, 0, 2, nodes);
 	printf("\n");
 	
+	//void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
+	zerg_connected(dir_graph, 0, 1, nodes);
 	/*
-	
 	for ( int x = 0; x < nodes; x++)
 	{
-		for ( int y = 0; y < nodes y++)
+		for ( int y = 0; y < nodes; y++)
 		{
 			printf("starting at %d \n", x );
-			shortest_path_v2(dir_graph, x, nodes);
-			// -> return a tu
+			zerg_connected(dir_graph, x, y, nodes);
 		}
 	}
 	*/
-
 	
 	free(reach);
 	destroyGraph(dir_graph);
+	
+	preOrder(dead_zerg->head, display_removed);
 	remove_tree(dead_zerg);	
 	return 0;
 }
-
-/*
- Find two paths? 
-	Use min heap with first run of dijkstra
-	Use max heap with first run of dijkstra
-	- This would get the shortest and longest path...remove edges of overlapping paths?
-
-*/
-/*
-
-// THe Dijkstra algorithm
-void shortest_path( graph_ptr graph, int start_vertex, int end_vertex, int num_nodes)
-{
-	int v = num_nodes; // number of vertex in the graph? pass in from BST?
-	//Warning cleared -> Thanks to Dr. Oberts!!!
-	double * distance = malloc(sizeof(double) * v);
-	int * pred = malloc(sizeof(int) * graph_nodes);
-	int i, j;
-	
-	//create a min heap
-	struct MinHeap * minHeap = createMinHeap(v);
-	//printf("here\n");
-	//initialize min heap with all vertices dist value of all vertex
-	for (int x = 0; x < v ; ++x )
-	{
-		distance[x] = MAX;
-		pred[x] = start_vertex;
-		//printf("vertex->src_ID :%u \n", graph->adjListArr[x].head->src_ID);
-		minHeap->array[x] = newMinHeapNode(x, graph->adjListArr[x].head->src_ID, distance[v]);
-		minHeap->pos[x] = x;
-	}	
-	//printf("end\n");
-	minHeap->array[start_vertex] = newMinHeapNode(start_vertex, graph->adjListArr[start_vertex].head->src_ID, distance[start_vertex]);
-	minHeap->pos[start_vertex] = start_vertex;
-	distance[start_vertex] = 0;
-	decreaseKey(minHeap, start_vertex, distance[start_vertex]);
-	
-	minHeap->size = v;
-	//printf("start = %d \n", start_vertex);
-	printf("\n");
-	while( !isEmpty(minHeap))
-	{
-		//Extract the vertex with minimum distance value
-		struct MinHeapNode * minHeapNode = extractMin(minHeap);
-		int u = minHeapNode->v;
-		
-		//Traverse through all adjacent vertices of u (the extracted
-		// vertex) and update their distance values.
-		printf("vertex = %d \n", u);
-		struct adjlist_node * pCrawl = graph->adjListArr[u].head;
-		while( pCrawl != NULL)
-		{
-			int v = pCrawl->vertex;
-			
-			//If shortest distance to is not finalized yet, and distance to v 
-			// through u is less than its previously calculated distance
-			//printf("distance u : %f \n", distance[u]);
-			//printf("less than MAX %f : %c \n", MAX,  distance[u] < MAX ? 'T':'F');
-			if ( isInMinHeap(minHeap, v) && (distance[u] < MAX) && (pCrawl->distance + distance[u] < distance[v]) )
-			{
-				distance[v] = distance[u] + pCrawl->distance;
-				pred[v] = u;
-				printf("v = %d \n", v);
-				//UPDATE DISTANCE VALUE in min heap also
-				decreaseKey(minHeap, v, distance[v]);
-								
-			}
-			pCrawl = pCrawl->next;
-		}
-	}
-	
-	destroyHeap(minHeap);
-	printf("\n");
-	printArr(distance, v, start_vertex);
-	printf("\n");
-	for ( i = 0; i < graph_nodes; i++)
-	{
-		if (i != start_vertex)
-		{
-			printf("\n Distance to %d = %3.2f ", i , distance[i]);
-			printf("     Path = %d ", i);
-			j = i;
-					
-			do
-			{
-				j = pred[j];
-				printf("<- %d ", j);
-			}while (j != start_vertex);
-		}
-	}
-}
-*/
-
 
 //Ensure all nodes are reachable from a given start point.
 void find_reachable(graph_ptr graph, const int current, bool reach[])

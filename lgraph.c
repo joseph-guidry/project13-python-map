@@ -84,13 +84,27 @@ void destroyGraph(graph_ptr graph)
 /* Add edge to graph */
 void addEdge(graph * graph, int src, uint16_t src_id, int dest, uint16_t dest_id, double distance)
 {
-	printf("adding edge\n");
+	//printf("adding edge\n");
 	//printf("src: %u | dest: %u \n", src, dest);
 	//printf("dist: %f \n", distance);
 	/*add an edge from src to dst in the adj. list*/
+	adjlist_node_ptr current;
 	adjlist_node_ptr newNode = createNode(dest, dest_id, distance);
-	newNode->next = graph->adjListArr[src].head;
-	graph->adjListArr[src].head = newNode;
+	if ( graph->adjListArr[src].num_members == 0 || graph->adjListArr[src].head->vertex >= newNode->vertex)
+	{
+		newNode->next = graph->adjListArr[src].head;
+		graph->adjListArr[src].head = newNode;
+	}
+	else
+	{
+		current = graph->adjListArr[src].head;
+		while( current->next != NULL && current->next->vertex < newNode->vertex )
+		{
+			current = current->next;
+		}
+		newNode -> next = current->next;
+		current->next = newNode;
+	}	
 	graph->adjListArr[src].num_members++;
 	
 	if(graph->type == UNDIRECTED)
@@ -163,7 +177,7 @@ void displayGraph(graph_ptr graph)
 		printf("\n%d: ", i);
 		while ( adjListPtr)
 		{
-			printf("%d:%04u-> ", adjListPtr->vertex, adjListPtr->src_ID);
+			printf("%d:%04u:%0.2f-> ", adjListPtr->vertex, adjListPtr->src_ID, adjListPtr->distance);
 			adjListPtr = adjListPtr->next;
 		}
 		printf("NULL\n");
