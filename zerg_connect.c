@@ -18,7 +18,7 @@ int compare_paths(int * path1, int * path2, int num_nodes, int start, int end)
 			if ( path1[x] == path2[y] )
 			{
 				if ( path1[x] == start || path1[x] == end )
-					continue;
+					break;
 				else
 					return path1[x];
 			}
@@ -86,44 +86,46 @@ int * find_longest_path(graph_ptr graph, int start, int end, int * reach, int * 
 	
 	
 	struct adjlist_node * pCrawl = graph->adjListArr[vertex].head;
-	
-	printf("\n\t %d\n\n ", graph->adjListArr[start].num_members );
+	//printf("head->vertex: %d \n", pCrawl->vertex);
+	//printf("\n\t %d\n\n ", graph->adjListArr[start].num_members );
 	if( graph->adjListArr[start].num_members < 3)
 	{
-		printf("LESS THAN 3\n");
 		while( pCrawl != NULL)
 		{
 			//printf("here1 [%d]:[%d]\n", pCrawl->vertex, count);
 			if ( !reach[pCrawl->vertex] )
 			{
 				//if ( !reach[pCrawl->next->vertex] )
-				printf("here2\n");
 				if ( longest < pCrawl->distance)
 				{
-					printf("here3\n");
 					longest = pCrawl->distance;
 					vertex = pCrawl->vertex;
 				}
 			}
 			pCrawl = pCrawl->next;
 		}
-		printf("pCrawl == NULL? %c \n", pCrawl == NULL ? 'T':'F');
+		//printf("pCrawl == NULL? %c \n", pCrawl == NULL ? 'T':'F');
 		find_longest_path(graph, vertex, end, reach, path, count);
 	}
 	else
 	{
+		printf("greater than 3\n");
+		
 		while( pCrawl != NULL)
 		{
-			printf("here1 [%d]:[%d]\n", pCrawl->vertex, pCrawl->next->vertex);
+			//printf("HERE!!! [%d]:[%d]\n", pCrawl->vertex, pCrawl->next->vertex);
 			if ( !reach[pCrawl->vertex]  )
 			{
 				if ( !reach[pCrawl->next->vertex]  )
-					printf("here2\n");
+				{
+					//Attempt to avoid a path that dead ends...
+				}
 				else if ( longest < pCrawl->distance)
 				{
-					
+					// TODO
 				}
 			}
+			
 			pCrawl = pCrawl->next;
 		}
 		printf("pCrawl == NULL? %c \n", pCrawl == NULL ? 'T':'F');
@@ -137,7 +139,6 @@ int * find_longest_path(graph_ptr graph, int start, int end, int * reach, int * 
 void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 {
 //void removeEdge(graph * graph, int src, int dest);
-	//RUN DIJKSTRAS with min_heap -> return shortest path from A to B
 	printf("Values: %d %d %d \n", start, end, num_nodes);
 	
 	printf("here in zerg_connect\n");
@@ -150,14 +151,14 @@ void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 		reach[x] = 0;
 		path1[x] = 0;
 	}
-	printf("here\n");
+	printf("getting shortest path\n");
 	path1 = find_shortest_path(graph, start, end, reach, path1, count);
 	
 	for ( int x = 0; x < num_nodes; x++ )
 	{
 		printf("[%d] ", path1[x]);
 		
-		//printf("remove edge: %d to %d \n", path1[x], path1[x + 1]);
+		printf("remove edge: %d to %d \n", path1[x], path1[x + 1]);
 		removeEdge(graph, path1[x], path1[x + 1]);
 		if ( path1[x + 1] == end )
 			break;
@@ -171,8 +172,8 @@ void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 		reach[x] = 0;
 		path2[x] = 0;
 	}
-	displayGraph(graph); // sort the graph based on weight????
-	
+	displayGraph(graph); 
+	printf("getting longest path\n");
 	find_longest_path(graph, start, end, reach, path2, count);
 	
 	for ( int x = 0; x < num_nodes; x++ )
@@ -184,7 +185,7 @@ void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 			break;
 		
 	} 
-	
+	printf("here about to cmp-paths\n");
 	int results = compare_paths(path1, path2, num_nodes, start, end);	
 
 	if ( (results < 0) )
@@ -195,7 +196,6 @@ void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 	{
 		printf("Zerg %d needs to be removed \n", results);
 	}
-	
 	
 }
 

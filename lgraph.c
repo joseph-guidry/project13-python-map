@@ -133,6 +133,7 @@ void removeEdge(graph * graph, int src, int dest)
 		//printf("destroy only node in the lsit\n");
 		graph->adjListArr[src].head = graph->adjListArr[src].head->next;
 		destroyNode(current);
+		graph->adjListArr[src].num_members--;
 		return;
 	}
 	// Traverse until the node to delete is found
@@ -164,6 +165,7 @@ void removeEdge(graph * graph, int src, int dest)
 			destroyNode(current);
 		}
 	}
+	graph->adjListArr[src].num_members--;
 	return;
 }
 
