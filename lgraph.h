@@ -18,7 +18,7 @@ typedef struct adjlist_node
 typedef struct adjlist
 {
 	int num_members;					/* number of members in the list */
-	//uint16_t src_ID;
+	uint16_t src_ID;					/* store src_id int adj List struct */
 	adjlist_node * head;				/* head of adj list */
 }adjlist, *adjlist_ptr;
 

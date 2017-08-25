@@ -28,7 +28,7 @@ FILE * printMsgPayload (struct zergPacket * pcapfile, FILE *fp)
 		}
 		pcap.message[x] = c;
 	}
-	printf("Message: %s\n", pcap.message);
+	//printf("Message: %s\n", pcap.message);
 	free(pcap.message);
 	return fp;
 }

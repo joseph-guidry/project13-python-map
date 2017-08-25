@@ -24,21 +24,17 @@ void remove_tree(struct tree * old_tree)
 		delNode(old_tree->head);
 		free(old_tree);
 	}
-	
 }
 
 //Makes new nodes with given key and NULL pointers.
 struct node * newNode ( unsigned int size)
 {
 	//*build the zerg structure
-	//printf("making a node with size = %d \n", size);
 	struct node * node = malloc(sizeof(*node));
-	//printf("after malloc\n");
 	if ( node != NULL)
 	{
 		node->key = malloc(size);
 		node->left = node->right = NULL;
-		//printf("here in newNode\n");
 		return (node);
 	}
 	return NULL;
@@ -58,7 +54,6 @@ void delNode(struct node * root)
 //Utility to right rotate subtre root with y//
 struct node * rightRotate(struct node *x)
 {	
-	//printf("in rightRotate\n");
 	struct node * y = x->left;
 	x->left = y->right;
 	y->right = x;
@@ -68,26 +63,21 @@ struct node * rightRotate(struct node *x)
 //Utility for a left rotate subtree rooted with x
 struct node * leftRotate(struct node * x)
 {
-	//printf("in leftRotate\n");
 	struct node * y = x->right;
 	x->right = y->left;
 	y->left = x;
-	//printf("returning y\n");
 	return y;
 }
 
 struct node * splay(struct node * root, uint16_t key, uint16_t (*get_srcID)(void * data) )
 {
-	//printf("in splay \n");
 	//Base cases: root = NULL or key at root
 	if (root == NULL || get_srcID(root->key) == key)
 	{
-		//printf("root == NULL?\n");
 		/* root == searched value */ 
 		/* modify data */
 		return root;
 	}
-	
 	//Look in left subtree
 	if (get_srcID(root->key) > key)
 	{
@@ -98,7 +88,6 @@ struct node * splay(struct node * root, uint16_t key, uint16_t (*get_srcID)(void
 		if ( get_srcID(root->left->key) > key) // if greater than
 		{
 			//Bring key to the root
-			//printf("doing splay left left\n");
 			root->left->left = splay(root->left->left, key, get_srcID);
 			//First rotation
 			root = rightRotate(root);
@@ -106,13 +95,11 @@ struct node * splay(struct node * root, uint16_t key, uint16_t (*get_srcID)(void
 		else if ( get_srcID(root->left->key) < key) //Left -Right -> else if less than
 		{
 			//Bring key to the root
-			//printf("doing splay left right\n");
 			root->left->right = splay(root->left->right, key, get_srcID);
 			
 			if (root->left->right != NULL)
 				root->left = leftRotate(root->left);
 		}
-		//printf("here in splay1\n");
 		return (root->left == NULL) ? root : rightRotate(root);
 	}	
 	else //Lookin in right subtree
@@ -124,7 +111,6 @@ struct node * splay(struct node * root, uint16_t key, uint16_t (*get_srcID)(void
 		if ( get_srcID(root->right->key) > key)
 		{
 			//bring up key of right left
-			//printf("doing splay right left\n");
 			root->right->left = splay(root->right->left, key, get_srcID);
 			//First rotation of right
 			if ( root->right->left != NULL)
@@ -133,12 +119,9 @@ struct node * splay(struct node * root, uint16_t key, uint16_t (*get_srcID)(void
 		else if ( get_srcID(root->right->key) < key)
 		{
 			//Bring key of right right 
-			//printf("doing splay right right\n");
 			root->right->right = splay(root->right->right, key, get_srcID);
-			//printf("back here\n");
 			root = leftRotate(root);
 		}
-		//printf("here in splay2\n");
 		return ( root->right == NULL) ? root: leftRotate(root);
 	}
 }
@@ -161,20 +144,16 @@ void preOrder(struct node * root, void (*display)(const void * data))
 struct node * insert(struct node * root, uint16_t src, unsigned int size, uint16_t (*get_srcID)(void * data) )
 {
 
-	//printf("inserting src: %u \n", src);
 	//Insertion to empty tree
 	if (root == NULL) 
 		return newNode(size);
 	
 	//Find node if present
 	root = splay(root, src, get_srcID);
-	//printf("return from splaying\n");
 	uint16_t src_ID = get_srcID(root->key);
-	//printf("src_ID = %u\n", src_ID);
 	//If found
 	if ( src_ID == src) 
 		return root;
-	//printf("here after splaying node\n");
 	struct node * newnode = newNode(size);
 	
 	//Make root as right child of newnode -> copy left child of root to newNode

@@ -11,7 +11,6 @@ FILE * buildPcapData(struct zergPacket * pcap, char *filename, int * filesize)
 	fp = fopen(filename, "rb");
 	if (fp == NULL)
 	{
-		//fprintf(stderr, "Could not open %s \n", filename);
 		return NULL;;
 	}
 	//GET FILESIZE
@@ -42,7 +41,6 @@ FILE * buildPacketData( struct zergPacket * pcap, FILE *fp )
 	fread(&ethertest, 1, sizeof(struct etherFrame),  fp);
 	pcap->pcapFrame = ethertest;
 	fread(&iptest, 1, 20,  fp);
-	//printf("here ip version: %u \n", iptest.ipv4.ver_header >> 4);
 	if (  (iptest.ipv4.ver_header >> 4) == 6)
 	{
 		fread(&iptest, 1, 20,  fp);
