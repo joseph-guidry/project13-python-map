@@ -1,0 +1,100 @@
+Name: Guidry, Joseph
+Date: 25 AUG 2017
+Current Module: Data Structures and Algorithms
+Project Name:  Zerg Map
+
+Project Goals:
+	<A two to three sentence description of the project and its intent>
+     
+	- The goal of this project is to incorporate the use of data structures to implement efficient algorithms, to read any 
+	number of zerg psychic captures from any number of files, then combine them to output health percentage below a passed in 
+	threshold, and determine if two disjoint paths can be made by removing the least amount of zergs.
+	
+Considerations:
+	<A bulleted list of considerations and conditions which affected the design of your project>
+    - Implementing an Abstract Data type: I used an splay tree, graph, and attempt to use a min heap for Dijkstra's 
+    	which was unsuccessful.
+    - Reading a pcap file which could have incorrect file parameters.
+    - Iterate through any number of files.
+    - Add zerg data, and update if needed.
+    - Process zergs into a graph and use path-finding to determine if disjoint paths are available.
+
+Initial Design:
+	<A paragraph or more that adequately describes your program's structure and layout discussing the various modules (.c and corresponding .h files) that you implemented>
+	
+	The program is structured with the decode.c file from the previous capstone is used to process the pcaps from the command
+	line, the output is a node which is inserted into a splay tree. Once all files have been processed, the zergs are checked to
+	determine if the health is below the threshold of 10% by default or passed in by a command line option -h.
+	The insert, search and print functions have access to the data in the tree. The initialization of the graph is done
+	recursively by stepping from each node to determine if an edge can be made to any other points.
+	The lgraph.c file processed the input data for edges into an array of linked lists holding onto the source id of the zerg.
+	Two tests are run to determine if the graph can eliminate zergs that can be removed, first, unreachable zergs are removed,
+	then secondly, zergs with only a single edge. 
+	
+	Following the removal of any zergs, vertex start and end values are updated to process the graph and determine if any paths 
+	are available, if the paths have no intersecting points, the program will exit and free all malloc'd data.
+	Else it will attempt to remove nodes in a list of vertexes that would satisfy the two disjoint paths problem.
+
+Data Flow:
+	<A paragraph or longer describing the data flow of the program in a sequential manner.  Include a diagram when necessary.>
+	
+	1. Ensures the size of the files, and places the data into proper header structures.
+	2. Check to ensure proper data before inserting into a tree. 
+	3. Create graph with edges from tree.
+	4. Attempt to remove any zerg that is unreachable or has only a single edge.
+	5. Run a path finding algorithm that attempts to find the shortest path, remove route.
+	6. Attempt to get the longest route.
+	7. If paths intersect, attempt to remove nodes.	
+	8. If number of zergs removed exceeds 50% of total, exit with error. 
+
+Communication Protocol:
+	<Discuss any custom communication protocol you have used including the various request and responses that may be sent and received.>
+
+	Zerg protocol version 1 over UDP 3751.
+	
+Potential Pitfalls:
+	<Discuss any potential issues that you might run into while creating the project>
+	
+	1. Handling misconfigured pcap files.
+	2. Correctly moving data into a bst, in case of updated zerg data.
+	3. Using haversine formula to get correct distance between zergs.
+	4. Building a graph from data in tree structure.
+	5. Using Dijkstra's, or bellman-ford's, and especially suurballes algorithm.  
+	6. Keeping track of removed zergs.
+	7. File management.
+	
+Test Plan:
+	User Test:
+ 		<Describe the steps taken for each user test.>
+ 		1. Construct decoder to output data that is inserted into the tree, print in pre-order to verify contents. 
+ 		2. Printing the graph with viable edges.
+ 		3. Remove zergs based on reach-ability or single edges.
+ 		4. Test for two disjoint paths, or which zergs to remove.
+ 		
+	Test Cases:
+		<A brief overview of the test cases that you implemented.>
+		1. Use given pcaps to test the correctness of input data through decoder and transition into the graph.
+		2. Use graphdriver.c to build custom graphs and test different path finding methods.
+		3. Combine all files to test the input of any number of files.   
+		4. Create fringe test cases which will break my path finding algorithm. Especially on more dense graphs.
+		
+		
+Conclusion:
+
+	<A review of the project, what worked, what didn’t and how to improve upon your project in the future.>
+
+	This project reinforced the need and examination of the design of a program with the use of
+	abstract data types, especial a graph.  The use of multiple data structures also came in handy, with different problems of
+	the project.  Transitioning the data required to do future portions of the project proved to be extremely difficult to 
+	redo.  Error checking done by the decoder, also showed a prime example on why to comment your code.   
+	
+	Stopping to create a more in depth plan for building my program as it progressed from each phase would have been beneficial 
+	allowing for possible adjustments down the road, or attempting to be more generic is the use of the data structures.
+	The use of an Adjacency List vs an Adjacency Matrix showed why one could be used over another. I practiced prior to this
+	project using an Adjacency List, which become difficult to use in implementing Dijkstra's algorithm for path finding. This
+	compounded as I attempted to implement suurballe's algorithm, which was suggested to be useful in this project. The
+	path-finding I used will work on sparse graphs, and may have undefined behavior on my dense graphs, something the matrix is
+	better suited for. 
+
+
+
