@@ -45,7 +45,7 @@ int main(int argc, char **argv)
 	pcap_nodes->head = decode(argc, argv, &pcap_nodes->count);
 	int nodes = pcap_nodes->count;
 	
-	printf("Display zergs health percentage from data received from input below %d %%\n", min_health);
+	printf("\nLow Health(%d %%):\n", min_health);
 	get_health(pcap_nodes->head, min_health);  
 	
 	//Create and initialize graph with data from tree data structure.
@@ -150,8 +150,7 @@ int main(int argc, char **argv)
 			printf("nodes to remove: ");
 			for ( int x = first_vertex; intersect_node[x] != updated_node_count; x++)
 			{
-				//dead_zerg->head = removeNode(dir_graph, intersect_node[x], dead_zerg->head, &dead_zerg->count);
-				printf("%d ", intersect_node[x]);
+				dead_zerg->head = removeNode(dir_graph, intersect_node[x], dead_zerg->head, &dead_zerg->count);
 			}
 		}
 	}
