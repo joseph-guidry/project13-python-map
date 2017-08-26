@@ -161,21 +161,21 @@ int * find_longest_path(graph_ptr graph, int start, int end, int * reach, int * 
 	return path;
 }
 
-void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
+int * zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 {
-	int count = 0;
+	int x, count = 0;
 	int * reach = NULL, * path1 = NULL;
 	reach = malloc(sizeof(int) * num_nodes );
 	path1 = malloc(sizeof(int) * num_nodes );
 	
-	for ( int x = 0; x < num_nodes; x++)
+	for ( x = 0; x < num_nodes; x++)
 	{
 		reach[x] = 0;
 		path1[x] = 0;
 	}
 	
 	path1 = find_shortest_path(graph, start, end, reach, path1, count);
-	for ( int x = 0; x < num_nodes; x++ )
+	for ( x = 0; x < num_nodes; x++ )
 	{
 		//printf("[%d] ", path1[x]);
 		removeEdge(graph, path1[x], path1[x + 1]);
@@ -205,7 +205,7 @@ void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 	}
 	 
 	path2 = find_longest_path(graph, start, end, reach, path2, count);
-	for ( int x = 0; x < num_nodes; x++ )
+	for ( x = 0; x < num_nodes; x++ )
 	{
 		//printf("[%d] ", path2[x]);
 		if ( path2[x + 1] == end )
@@ -216,20 +216,81 @@ void zerg_connected(graph_ptr graph, int start, int end, int num_nodes)
 		
 	} 
 	//printf("\n");
-	int results = compare_paths(path1, path2, num_nodes, start, end);	
-
+	int idx, end_idx, results = compare_paths(path1, path2, num_nodes, start, end);	
+	int * remove = NULL;
 	if ( (results < 0) )
 	{
 		printf("Zergs are fully connected\n");
 	}
 	else
 	{
-		printf("Zergs after %d needs to be removed \n", results);
+		for ( x = 0; x < num_nodes; x++)
+		{
+			if ( path1[x] == results)
+				idx = x;
+			
+			if ( path1[x] == end)
+				end_idx = x;
+		}
+		if ( idx > (end_idx / 2) )
+		{
+			printf("Zergs after %d needs to be removed \n", results);
+			remove = malloc(sizeof(int) * num_nodes);
+			count = 0;;
+			printf("Zergs after %d needs to be removed \n", results);
+			for ( int x = 0; x < num_nodes; x++)
+			{
+				printf("vertex: %d\n", path1[x]);
+				if ( path1[x] == results)
+				{
+					for ( int y = x + 1; path1[y] != -1; y++)
+					{
+						printf("remove vertex :%d\n", path1[y] );
+						remove[count++] = path1[y];
+					}
+					break;
+				}
+			}
+			for ( int x = 0; x < num_nodes; x++)
+			{
+				printf("vertex: %d\n", path1[x]);
+				if ( path2[x] == results)
+				{
+					for ( int y = x + 1; path2[y] != end; y++)
+					{
+						printf("remove vertex :%d\n", path2[y] );
+						remove[count++] = path2[y];
+					}
+				}
+			}
+		}
+		else
+		{
+			printf("Zergs before %d needs to be removed \n", results);
+			remove = malloc(sizeof(int) * num_nodes);
+			count = 0;
+			for ( x = 0; x < num_nodes; x++)
+			{
+				printf("vertex: %d \n", path1[x]);
+				if ( path1[x] == results)
+					break;
+				remove[count++] = path1[x];
+			}
+			for ( x = 0; x < num_nodes; x++)
+			{
+				printf("vertex: %d \n", path2[x]);
+				if ( path2[x] == start)
+					continue;
+				if ( path2[x] == results)
+					break;
+				remove[count++] = path2[x];
+			}
+		}
 	}
 	
 	free(reach);
 	free(path1);
 	free(path2);
-	
+	return remove;
 }
 

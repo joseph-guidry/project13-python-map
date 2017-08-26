@@ -23,7 +23,7 @@ void adding_nodes(graph_ptr graph, struct node * zerg, struct node * root);
 struct node * removeNode(graph_ptr graph, int node, struct node * root, int * count );
 
 void find_reachable(graph_ptr graph, const int start, bool reach[]);
-void zerg_connected(graph_ptr graph, int start, int end, int num_nodes);
+int * zerg_connected(graph_ptr graph, int start, int end, int num_nodes);
 int check_first_vertex(graph_ptr graph, int nodes);
 int check_last_vertex(graph_ptr graph, int nodes);
 
@@ -128,6 +128,7 @@ int main(int argc, char **argv)
 		}
 	}
 	
+	int * intersect_node;
 	// Check the first vertex in the graph
 	first_vertex = check_first_vertex(dir_graph, nodes);
 	// Check the last vertex in the graph
@@ -140,7 +141,19 @@ int main(int argc, char **argv)
 	else
 	{
 		//Attempt to determine zerg connected by getting 2 disjoint paths from index 0 to last useable vertex;
-		zerg_connected(dir_graph, first_vertex, last_vertex, updated_node_count);
+		intersect_node = zerg_connected(dir_graph, first_vertex, last_vertex, updated_node_count);
+		
+		// If the paths return a path of nodes to remove from paths that intersect, they are 
+		// removed and added to the dead_zerg list;
+		if ( (intersect_node != NULL) )
+		{
+			printf("nodes to remove: ");
+			for ( int x = first_vertex; intersect_node[x] != updated_node_count; x++)
+			{
+				//dead_zerg->head = removeNode(dir_graph, intersect_node[x], dead_zerg->head, &dead_zerg->count);
+				printf("%d ", intersect_node[x]);
+			}
+		}
 	}
 
 	//Output zergs that were removed from the graph
@@ -152,6 +165,9 @@ int main(int argc, char **argv)
 	remove_tree(dead_zerg);
 	if ( dead_zerg == NULL)
 		free(dead_zerg);
+		
+	if ( intersect_node != NULL)
+		free(intersect_node);
 	
 	return 0;
 }
